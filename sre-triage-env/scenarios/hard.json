@@ -1,0 +1,716 @@
+{
+  "difficulty": "hard",
+  "description": "Complex scenarios with subtle indicators, red herrings, and deep system knowledge required",
+  "scenarios": [
+    {
+      "id": "hard_001",
+      "task_type": "root_cause",
+      "task_description": "Multi-layered cascading failure with several red herrings. Identify the true originating cause.",
+      "metrics": {
+        "api_tier1": {"cpu": 78, "memory": 82, "error_rate": 0.18, "latency_p99": 5200},
+        "api_tier2": {"cpu": 72, "memory": 75, "error_rate": 0.15, "latency_p99": 4800},
+        "cache_layer": {"cpu": 55, "memory": 88, "error_rate": 0.0, "latency_p99": 850},
+        "connection_pool": {"cpu": 92, "memory": 78, "error_rate": 0.0, "latency_p99": 2800},
+        "database": {"cpu": 48, "memory": 62, "error_rate": 0.0, "latency_p99": 120},
+        "queue_processor": {"cpu": 85, "memory": 88, "error_rate": 0.22, "latency_p99": 8500}
+      },
+      "alerts": [
+        {"service": "connection_pool", "type": "CriticalCPU", "threshold": "90%", "current": "92%", "duration": "22m"},
+        {"service": "queue_processor", "type": "HighErrorRate", "threshold": "0.05", "current": "0.22", "duration": "18m"},
+        {"service": "api_tier1", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.18", "duration": "15m"},
+        {"service": "cache_layer", "type": "HighMemory", "threshold": "85%", "current": "88%", "duration": "25m"}
+      ],
+      "logs": [
+        "[connection_pool] ERROR: Thread pool exhausted waiting for connections",
+        "[connection_pool] WARN: All 500 connections allocated, queue depth: 2400",
+        "[connection_pool] ERROR: Connection lease timeout after 30s",
+        "[database] INFO: Active connections: 485, Max: 500",
+        "[database] INFO: Query execution times normal (p99: 120ms)",
+        "[queue_processor] ERROR: Failed to acquire database connection",
+        "[queue_processor] WARN: Message processing stalled",
+        "[api_tier1] ERROR: Background task submission failed",
+        "[api_tier2] WARN: Async job queue backing up",
+        "[cache_layer] INFO: Cache hit rate: 94% (normal)",
+        "[cache_layer] WARN: Memory pressure from connection metadata"
+      ],
+      "service_dependencies": {
+        "api_tier1": ["cache_layer", "queue_processor", "database"],
+        "api_tier2": ["cache_layer", "queue_processor", "database"],
+        "queue_processor": ["connection_pool", "database"],
+        "connection_pool": ["database"]
+      },
+      "previous_incidents": [
+        {"date": "2024-01-10", "service": "queue_processor", "cause": "connection leak in error handling path"}
+      ],
+      "ground_truth": {
+        "severity": "P1",
+        "affected_service": "connection_pool",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_002",
+      "task_type": "silent_failure",
+      "task_description": "Subtle data corruption propagating through system. Most metrics appear normal.",
+      "metrics": {
+        "data_ingestion": {"cpu": 52, "memory": 68, "error_rate": 0.0, "latency_p99": 480},
+        "validation_service": {"cpu": 45, "memory": 55, "error_rate": 0.03, "latency_p99": 320},
+        "transform_pipeline": {"cpu": 58, "memory": 62, "error_rate": 0.0, "latency_p99": 850},
+        "downstream_analytics": {"cpu": 48, "memory": 58, "error_rate": 0.0, "latency_p99": 1200}
+      },
+      "alerts": [],
+      "logs": [
+        "[data_ingestion] INFO: Processing 4.2M events/hour",
+        "[data_ingestion] INFO: All data sources reporting normally",
+        "[validation_service] WARN: Schema validation errors: 1240 (0.03%)",
+        "[validation_service] INFO: Error rate within acceptable threshold",
+        "[validation_service] DEBUG: Unexpected null values in 'revenue' field",
+        "[transform_pipeline] INFO: Pipeline throughput normal",
+        "[transform_pipeline] INFO: No transformation errors",
+        "[downstream_analytics] INFO: Dashboard queries completing successfully",
+        "[downstream_analytics] DEBUG: Revenue metrics showing unexpected drop"
+      ],
+      "service_dependencies": {
+        "transform_pipeline": ["data_ingestion", "validation_service"],
+        "downstream_analytics": ["transform_pipeline"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P2",
+        "affected_service": "validation_service",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_003",
+      "task_type": "severity",
+      "task_description": "Obscure race condition causing intermittent failures. Assess severity with limited clear signals.",
+      "metrics": {
+        "distributed_lock": {"cpu": 72, "memory": 68, "error_rate": 0.08, "latency_p99": 1800},
+        "state_machine": {"cpu": 65, "memory": 72, "error_rate": 0.12, "latency_p99": 2400},
+        "workflow_engine": {"cpu": 58, "memory": 62, "error_rate": 0.05, "latency_p99": 980}
+      },
+      "alerts": [
+        {"service": "state_machine", "type": "ModerateErrorRate", "threshold": "0.05", "current": "0.12", "duration": "45m"},
+        {"service": "distributed_lock", "type": "ModerateErrorRate", "threshold": "0.05", "current": "0.08", "duration": "42m"}
+      ],
+      "logs": [
+        "[distributed_lock] ERROR: Lock acquisition failed: already held",
+        "[distributed_lock] WARN: Lock timeout after 5000ms",
+        "[distributed_lock] DEBUG: Lock contention on key: workflow_state_abc123",
+        "[state_machine] ERROR: State transition failed: concurrent modification",
+        "[state_machine] WARN: Detected duplicate state update attempt",
+        "[state_machine] ERROR: Workflow stuck in 'processing' state",
+        "[workflow_engine] WARN: Workflow execution timeout",
+        "[workflow_engine] INFO: Retry scheduled for failed workflow"
+      ],
+      "service_dependencies": {
+        "workflow_engine": ["state_machine", "distributed_lock"],
+        "state_machine": ["distributed_lock", "persistence_layer"]
+      },
+      "previous_incidents": [
+        {"date": "2024-02-01", "service": "distributed_lock", "cause": "clock skew between nodes"}
+      ],
+      "ground_truth": {
+        "severity": "P3",
+        "affected_service": "distributed_lock",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_004",
+      "task_type": "root_cause",
+      "task_description": "Complex interaction between microservices causing emergent behavior. Find root cause.",
+      "metrics": {
+        "order_service": {"cpu": 68, "memory": 72, "error_rate": 0.15, "latency_p99": 4200},
+        "inventory_service": {"cpu": 75, "memory": 78, "error_rate": 0.18, "latency_p99": 5800},
+        "pricing_service": {"cpu": 55, "memory": 62, "error_rate": 0.08, "latency_p99": 1800},
+        "recommendation_cache": {"cpu": 88, "memory": 95, "error_rate": 0.0, "latency_p99": 12000},
+        "product_catalog": {"cpu": 48, "memory": 58, "error_rate": 0.0, "latency_p99": 280}
+      },
+      "alerts": [
+        {"service": "recommendation_cache", "type": "CriticalMemory", "threshold": "90%", "current": "95%", "duration": "35m"},
+        {"service": "inventory_service", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.18", "duration": "28m"},
+        {"service": "order_service", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.15", "duration": "25m"}
+      ],
+      "logs": [
+        "[recommendation_cache] ERROR: OOM: Cannot allocate 4MB for cache entry",
+        "[recommendation_cache] WARN: Cache key size exceeds expected: 2.8MB",
+        "[recommendation_cache] ERROR: Serialized object size: inventory snapshot",
+        "[inventory_service] WARN: Caching full inventory snapshots",
+        "[inventory_service] ERROR: Cache write failed, retrying",
+        "[inventory_service] INFO: Inventory queries timing out on cache",
+        "[order_service] ERROR: Inventory check failed: timeout",
+        "[pricing_service] WARN: Price calculation delayed",
+        "[product_catalog] INFO: Catalog queries performing normally"
+      ],
+      "service_dependencies": {
+        "order_service": ["inventory_service", "pricing_service"],
+        "inventory_service": ["recommendation_cache", "product_catalog"],
+        "pricing_service": ["product_catalog"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P2",
+        "affected_service": "inventory_service",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_005",
+      "task_type": "silent_failure",
+      "task_description": "Byzantine failure: some requests succeed, others fail unpredictably. Determine if incident.",
+      "metrics": {
+        "routing_layer": {"cpu": 62, "memory": 68, "error_rate": 0.08, "latency_p99": 2400},
+        "service_a": {"cpu": 45, "memory": 52, "error_rate": 0.02, "latency_p99": 380},
+        "service_b": {"cpu": 48, "memory": 55, "error_rate": 0.14, "latency_p99": 3200},
+        "service_c": {"cpu": 42, "memory": 48, "error_rate": 0.0, "latency_p99": 280}
+      },
+      "alerts": [],
+      "logs": [
+        "[routing_layer] WARN: Inconsistent response from backend services",
+        "[routing_layer] INFO: Request route: /api/users -> service_b (shard: 42)",
+        "[routing_layer] ERROR: 500 error from service_b for user_id: 891234",
+        "[routing_layer] INFO: Retry succeeded on service_b",
+        "[service_a] INFO: Serving requests normally",
+        "[service_b] ERROR: Shard 42: corrupt index detected",
+        "[service_b] INFO: Other shards responding normally",
+        "[service_b] WARN: Shard 42 error rate: 28% (overall: 14%)",
+        "[service_c] INFO: All requests successful"
+      ],
+      "service_dependencies": {
+        "routing_layer": ["service_a", "service_b", "service_c"]
+      },
+      "previous_incidents": [
+        {"date": "2024-01-28", "service": "service_b", "cause": "disk corruption on shard database"}
+      ],
+      "ground_truth": {
+        "severity": "P3",
+        "affected_service": "service_b",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_006",
+      "task_type": "severity",
+      "task_description": "Gradual memory leak only visible over extended time period. Rate urgency.",
+      "metrics": {
+        "session_manager": {"cpu": 58, "memory": 87, "error_rate": 0.0, "latency_p99": 420},
+        "application_server": {"cpu": 52, "memory": 68, "error_rate": 0.0, "latency_p99": 380}
+      },
+      "alerts": [
+        {"service": "session_manager", "type": "HighMemory", "threshold": "85%", "current": "87%", "duration": "180m"}
+      ],
+      "logs": [
+        "[session_manager] INFO: Active sessions: 42,400",
+        "[session_manager] INFO: Session cleanup running on schedule",
+        "[session_manager] WARN: Memory usage increasing 0.2% per hour",
+        "[session_manager] DEBUG: GC frequency increased: 8 collections/min",
+        "[session_manager] DEBUG: Old generation heap: 78% full",
+        "[application_server] INFO: All operations normal"
+      ],
+      "service_dependencies": {
+        "application_server": ["session_manager", "cache"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P4",
+        "affected_service": "session_manager",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_007",
+      "task_type": "root_cause",
+      "task_description": "Resource contention in shared infrastructure. Multiple services impacted, identify root cause.",
+      "metrics": {
+        "batch_job_a": {"cpu": 92, "memory": 88, "error_rate": 0.0, "latency_p99": 850},
+        "realtime_api": {"cpu": 72, "memory": 78, "error_rate": 0.22, "latency_p99": 8500},
+        "background_worker": {"cpu": 68, "memory": 72, "error_rate": 0.15, "latency_p99": 5200},
+        "shared_db_cluster": {"cpu": 95, "memory": 92, "error_rate": 0.0, "latency_p99": 4200},
+        "scheduler": {"cpu": 45, "memory": 52, "error_rate": 0.0, "latency_p99": 180}
+      },
+      "alerts": [
+        {"service": "shared_db_cluster", "type": "CriticalCPU", "threshold": "90%", "current": "95%", "duration": "25m"},
+        {"service": "shared_db_cluster", "type": "HighMemory", "threshold": "90%", "current": "92%", "duration": "25m"},
+        {"service": "realtime_api", "type": "HighErrorRate", "threshold": "0.05", "current": "0.22", "duration": "20m"},
+        {"service": "background_worker", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.15", "duration": "18m"}
+      ],
+      "logs": [
+        "[batch_job_a] INFO: Running scheduled analytics aggregation",
+        "[batch_job_a] INFO: Processing 50M rows",
+        "[batch_job_a] WARN: Query execution slower than usual",
+        "[shared_db_cluster] ERROR: Long-running query detected: 18s",
+        "[shared_db_cluster] WARN: Table lock contention on analytics_events",
+        "[shared_db_cluster] ERROR: Query queue depth: 2400",
+        "[realtime_api] ERROR: Database query timeout",
+        "[realtime_api] ERROR: Failed to load user dashboard",
+        "[background_worker] ERROR: Job processing timeout",
+        "[scheduler] INFO: All jobs launched on schedule"
+      ],
+      "service_dependencies": {
+        "realtime_api": ["shared_db_cluster"],
+        "background_worker": ["shared_db_cluster"],
+        "batch_job_a": ["shared_db_cluster", "scheduler"]
+      },
+      "previous_incidents": [
+        {"date": "2024-01-15", "service": "shared_db_cluster", "cause": "batch job not isolated, impacted OLTP workload"}
+      ],
+      "ground_truth": {
+        "severity": "P2",
+        "affected_service": "batch_job_a",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_008",
+      "task_type": "silent_failure",
+      "task_description": "Complex monitoring anomaly. Distinguish between measurement artifact and real problem.",
+      "metrics": {
+        "metrics_aggregator": {"cpu": 78, "memory": 82, "error_rate": 0.0, "latency_p99": 1200},
+        "time_series_db": {"cpu": 88, "memory": 92, "error_rate": 0.0, "latency_p99": 2800},
+        "monitored_service": {"cpu": 52, "memory": 58, "error_rate": 0.0, "latency_p99": 380}
+      },
+      "alerts": [],
+      "logs": [
+        "[metrics_aggregator] INFO: Processing metric streams",
+        "[metrics_aggregator] WARN: Metric timestamps out of order",
+        "[metrics_aggregator] DEBUG: Clock drift detected: source server +450ms",
+        "[metrics_aggregator] INFO: Applying timestamp correction",
+        "[time_series_db] INFO: Write throughput: 240k points/sec",
+        "[time_series_db] WARN: Backfilling out-of-order data",
+        "[monitored_service] INFO: All health checks passing",
+        "[monitored_service] INFO: Request handling normal"
+      ],
+      "service_dependencies": {
+        "metrics_aggregator": ["time_series_db"],
+        "time_series_db": ["storage_backend"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "NONE",
+        "affected_service": "",
+        "is_incident": false
+      }
+    },
+    {
+      "id": "hard_009",
+      "task_type": "severity",
+      "task_description": "Dependency graph cycle causing subtle deadlock. Assess criticality.",
+      "metrics": {
+        "service_mesh_control": {"cpu": 75, "memory": 78, "error_rate": 0.12, "latency_p99": 5800},
+        "config_service": {"cpu": 68, "memory": 72, "error_rate": 0.08, "latency_p99": 4200},
+        "secret_manager": {"cpu": 72, "memory": 75, "error_rate": 0.15, "latency_p99": 6800},
+        "app_service_1": {"cpu": 55, "memory": 62, "error_rate": 0.05, "latency_p99": 1800}
+      },
+      "alerts": [
+        {"service": "secret_manager", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.15", "duration": "32m"},
+        {"service": "service_mesh_control", "type": "ModerateErrorRate", "threshold": "0.05", "current": "0.12", "duration": "30m"},
+        {"service": "config_service", "type": "ModerateErrorRate", "threshold": "0.05", "current": "0.08", "duration": "28m"}
+      ],
+      "logs": [
+        "[secret_manager] ERROR: Timeout fetching config from config_service",
+        "[secret_manager] WARN: Cannot refresh service credentials",
+        "[config_service] ERROR: Timeout fetching mesh config",
+        "[config_service] WARN: Stale configuration served",
+        "[service_mesh_control] ERROR: Cannot authenticate to config_service",
+        "[service_mesh_control] WARN: Using cached mesh topology",
+        "[app_service_1] WARN: Config refresh delayed",
+        "[app_service_1] INFO: Operating with last known good config"
+      ],
+      "service_dependencies": {
+        "service_mesh_control": ["config_service", "secret_manager"],
+        "config_service": ["service_mesh_control", "secret_manager"],
+        "secret_manager": ["config_service"],
+        "app_service_1": ["config_service", "service_mesh_control"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P3",
+        "affected_service": "config_service",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_010",
+      "task_type": "root_cause",
+      "task_description": "Distributed consensus failure. Complex Raft/Paxos issue affecting cluster health.",
+      "metrics": {
+        "consensus_node_1": {"cpu": 85, "memory": 82, "error_rate": 0.18, "latency_p99": 8500},
+        "consensus_node_2": {"cpu": 88, "memory": 85, "error_rate": 0.22, "latency_p99": 9200},
+        "consensus_node_3": {"cpu": 92, "memory": 88, "error_rate": 0.28, "latency_p99": 12000},
+        "kv_store_client": {"cpu": 68, "memory": 72, "error_rate": 0.32, "latency_p99": 15000},
+        "cluster_coordinator": {"cpu": 78, "memory": 75, "error_rate": 0.25, "latency_p99": 11000}
+      },
+      "alerts": [
+        {"service": "consensus_node_3", "type": "HighErrorRate", "threshold": "0.05", "current": "0.28", "duration": "15m"},
+        {"service": "kv_store_client", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.32", "duration": "12m"},
+        {"service": "cluster_coordinator", "type": "HighErrorRate", "threshold": "0.05", "current": "0.25", "duration": "10m"}
+      ],
+      "logs": [
+        "[consensus_node_3] ERROR: Network partition detected",
+        "[consensus_node_3] WARN: Cannot reach quorum: 1/3 nodes reachable",
+        "[consensus_node_3] ERROR: Split brain risk: saw node_1 as leader",
+        "[consensus_node_2] WARN: Raft election timeout, starting election",
+        "[consensus_node_2] ERROR: Election failed: no quorum",
+        "[consensus_node_1] ERROR: Lost leadership, no followers responding",
+        "[cluster_coordinator] ERROR: No healthy leader available",
+        "[cluster_coordinator] WARN: Cluster unavailable for writes",
+        "[kv_store_client] ERROR: Write failed: no leader elected",
+        "[kv_store_client] ERROR: Read failed: quorum not available"
+      ],
+      "service_dependencies": {
+        "kv_store_client": ["cluster_coordinator"],
+        "cluster_coordinator": ["consensus_node_1", "consensus_node_2", "consensus_node_3"]
+      },
+      "previous_incidents": [
+        {"date": "2024-01-20", "service": "consensus_node_2", "cause": "network switch firmware bug caused packet loss"}
+      ],
+      "ground_truth": {
+        "severity": "P1",
+        "affected_service": "consensus_node_3",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_011",
+      "task_type": "silent_failure",
+      "task_description": "Canary deployment with subtle regression. Verify if rollout should continue.",
+      "metrics": {
+        "production_stable": {"cpu": 48, "memory": 55, "error_rate": 0.01, "latency_p99": 280},
+        "canary_new_version": {"cpu": 52, "memory": 58, "error_rate": 0.03, "latency_p99": 320},
+        "load_balancer": {"cpu": 35, "memory": 42, "error_rate": 0.0, "latency_p99": 15}
+      },
+      "alerts": [],
+      "logs": [
+        "[load_balancer] INFO: Traffic split: 95% stable, 5% canary",
+        "[load_balancer] INFO: Canary receiving 240 req/min",
+        "[production_stable] INFO: Error rate: 0.01% (baseline)",
+        "[production_stable] INFO: Latency p99: 280ms (baseline)",
+        "[canary_new_version] INFO: Error rate: 0.03% (+200% vs baseline)",
+        "[canary_new_version] INFO: Latency p99: 320ms (+14% vs baseline)",
+        "[canary_new_version] DEBUG: New DB query path used in 8% of requests",
+        "[canary_new_version] WARN: Retry rate elevated: 12 retries in last 5min"
+      ],
+      "service_dependencies": {
+        "load_balancer": ["production_stable", "canary_new_version"],
+        "canary_new_version": ["database", "cache"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P4",
+        "affected_service": "canary_new_version",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_012",
+      "task_type": "severity",
+      "task_description": "Certificate expiration cascading through services. Complex trust chain issues.",
+      "metrics": {
+        "api_gateway": {"cpu": 68, "memory": 72, "error_rate": 0.28, "latency_p99": 8500},
+        "internal_ca": {"cpu": 55, "memory": 62, "error_rate": 0.0, "latency_p99": 180},
+        "service_mesh": {"cpu": 75, "memory": 78, "error_rate": 0.32, "latency_p99": 12000},
+        "microservice_a": {"cpu": 62, "memory": 68, "error_rate": 0.22, "latency_p99": 6800}
+      },
+      "alerts": [
+        {"service": "service_mesh", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.32", "duration": "8m"},
+        {"service": "api_gateway", "type": "HighErrorRate", "threshold": "0.05", "current": "0.28", "duration": "8m"},
+        {"service": "microservice_a", "type": "HighErrorRate", "threshold": "0.05", "current": "0.22", "duration": "6m"}
+      ],
+      "logs": [
+        "[service_mesh] ERROR: TLS handshake failed: certificate expired",
+        "[service_mesh] ERROR: x509: certificate has expired",
+        "[service_mesh] WARN: Intermediate CA cert expired 8 minutes ago",
+        "[api_gateway] ERROR: Upstream SSL verification failed",
+        "[api_gateway] ERROR: Cannot establish connection to backend services",
+        "[microservice_a] ERROR: mTLS authentication failed",
+        "[microservice_a] WARN: Service-to-service calls failing",
+        "[internal_ca] INFO: CA root certificate valid until 2026",
+        "[internal_ca] WARN: Intermediate cert renewal overdue"
+      ],
+      "service_dependencies": {
+        "api_gateway": ["service_mesh", "microservice_a"],
+        "service_mesh": ["internal_ca"],
+        "microservice_a": ["service_mesh"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P1",
+        "affected_service": "service_mesh",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_013",
+      "task_type": "root_cause",
+      "task_description": "Observability system failure masking real incident. Find what's actually broken.",
+      "metrics": {
+        "metrics_pipeline": {"cpu": 88, "memory": 92, "error_rate": 0.42, "latency_p99": 25000},
+        "log_aggregator": {"cpu": 78, "memory": 85, "error_rate": 0.28, "latency_p99": 12000},
+        "alerting_system": {"cpu": 68, "memory": 75, "error_rate": 0.15, "latency_p99": 5800},
+        "kafka_cluster": {"cpu": 95, "memory": 98, "error_rate": 0.0, "latency_p99": 8500}
+      },
+      "alerts": [
+        {"service": "kafka_cluster", "type": "CriticalMemory", "threshold": "90%", "current": "98%", "duration": "35m"},
+        {"service": "metrics_pipeline", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.42", "duration": "30m"},
+        {"service": "log_aggregator", "type": "HighErrorRate", "threshold": "0.05", "current": "0.28", "duration": "28m"}
+      ],
+      "logs": [
+        "[kafka_cluster] ERROR: Broker disk full on partition 42",
+        "[kafka_cluster] WARN: Unable to write to topics: metrics, logs",
+        "[kafka_cluster] ERROR: Producer timeout for metrics topic",
+        "[metrics_pipeline] ERROR: Failed to publish metrics to Kafka",
+        "[metrics_pipeline] WARN: Metrics buffer overflow, dropping data",
+        "[log_aggregator] ERROR: Log ingestion failing",
+        "[alerting_system] ERROR: Cannot evaluate alert rules: missing metrics",
+        "[alerting_system] WARN: Alerts may be delayed or missing"
+      ],
+      "service_dependencies": {
+        "metrics_pipeline": ["kafka_cluster"],
+        "log_aggregator": ["kafka_cluster"],
+        "alerting_system": ["metrics_pipeline"]
+      },
+      "previous_incidents": [
+        {"date": "2024-02-03", "service": "kafka_cluster", "cause": "log retention policy too aggressive, disk filled"}
+      ],
+      "ground_truth": {
+        "severity": "P2",
+        "affected_service": "kafka_cluster",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_014",
+      "task_type": "silent_failure",
+      "task_description": "Time synchronization issue causing distributed transaction anomalies.",
+      "metrics": {
+        "transaction_coordinator": {"cpu": 65, "memory": 72, "error_rate": 0.04, "latency_p99": 1800},
+        "participant_service_a": {"cpu": 52, "memory": 58, "error_rate": 0.0, "latency_p99": 380},
+        "participant_service_b": {"cpu": 55, "memory": 62, "error_rate": 0.02, "latency_p99": 450}
+      },
+      "alerts": [],
+      "logs": [
+        "[transaction_coordinator] WARN: Timestamp ordering violation detected",
+        "[transaction_coordinator] DEBUG: Transaction T1 timestamp: 2024-04-04T08:05:22.450Z",
+        "[transaction_coordinator] DEBUG: Transaction T2 timestamp: 2024-04-04T08:05:21.980Z",
+        "[transaction_coordinator] INFO: T2 arrived after T1 but has earlier timestamp",
+        "[participant_service_a] INFO: Clock source: NTP server ntp1.example.com",
+        "[participant_service_b] INFO: Clock source: NTP server ntp2.example.com",
+        "[participant_service_b] WARN: NTP offset: +850ms",
+        "[transaction_coordinator] INFO: Compensating with logical timestamps"
+      ],
+      "service_dependencies": {
+        "transaction_coordinator": ["participant_service_a", "participant_service_b"],
+        "participant_service_a": ["ntp_service"],
+        "participant_service_b": ["ntp_service"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "NONE",
+        "affected_service": "",
+        "is_incident": false
+      }
+    },
+    {
+      "id": "hard_015",
+      "task_type": "severity",
+      "task_description": "Quota exhaustion in cloud provider. Complex rate limiting and throttling.",
+      "metrics": {
+        "cloud_api_client": {"cpu": 68, "memory": 72, "error_rate": 0.32, "latency_p99": 28000},
+        "resource_provisioner": {"cpu": 75, "memory": 78, "error_rate": 0.28, "latency_p99": 18000},
+        "auto_scaler": {"cpu": 62, "memory": 68, "error_rate": 0.15, "latency_p99": 8500}
+      },
+      "alerts": [
+        {"service": "cloud_api_client", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.32", "duration": "45m"},
+        {"service": "resource_provisioner", "type": "HighErrorRate", "threshold": "0.05", "current": "0.28", "duration": "42m"}
+      ],
+      "logs": [
+        "[cloud_api_client] ERROR: AWS API error: RequestLimitExceeded",
+        "[cloud_api_client] ERROR: Rate limit hit for EC2:RunInstances",
+        "[cloud_api_client] WARN: Quota usage: 4950/5000 instances",
+        "[resource_provisioner] ERROR: Cannot provision new compute instances",
+        "[resource_provisioner] WARN: Scaling requests queued: 45 pending",
+        "[auto_scaler] ERROR: Scale-up operation failed",
+        "[auto_scaler] WARN: Cluster under-provisioned for current load"
+      ],
+      "service_dependencies": {
+        "resource_provisioner": ["cloud_api_client"],
+        "auto_scaler": ["resource_provisioner", "metrics_system"]
+      },
+      "previous_incidents": [
+        {"date": "2024-01-08", "service": "cloud_api_client", "cause": "quota increase request approved, limit raised"}
+      ],
+      "ground_truth": {
+        "severity": "P2",
+        "affected_service": "cloud_api_client",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_016",
+      "task_type": "root_cause",
+      "task_description": "Encryption key rotation causing intermittent decrypt failures across services.",
+      "metrics": {
+        "key_management": {"cpu": 72, "memory": 78, "error_rate": 0.0, "latency_p99": 420},
+        "encryption_service": {"cpu": 82, "memory": 85, "error_rate": 0.18, "latency_p99": 5800},
+        "data_service_a": {"cpu": 68, "memory": 72, "error_rate": 0.22, "latency_p99": 8200},
+        "data_service_b": {"cpu": 65, "memory": 70, "error_rate": 0.15, "latency_p99": 6800}
+      },
+      "alerts": [
+        {"service": "data_service_a", "type": "HighErrorRate", "threshold": "0.05", "current": "0.22", "duration": "25m"},
+        {"service": "encryption_service", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.18", "duration": "22m"}
+      ],
+      "logs": [
+        "[key_management] INFO: Key rotation completed: master-key-v5 now active",
+        "[key_management] INFO: Old keys (v1-v4) marked for deprecation",
+        "[encryption_service] ERROR: Decrypt failed: key version mismatch",
+        "[encryption_service] WARN: Data encrypted with key-v3, but key not loaded",
+        "[encryption_service] ERROR: KeyNotFoundException for version 3",
+        "[data_service_a] ERROR: Cannot decrypt user data",
+        "[data_service_a] ERROR: Encryption layer returned 400",
+        "[data_service_b] ERROR: Failed to read encrypted field",
+        "[data_service_b] WARN: Some records readable, others failing"
+      ],
+      "service_dependencies": {
+        "data_service_a": ["encryption_service"],
+        "data_service_b": ["encryption_service"],
+        "encryption_service": ["key_management"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P1",
+        "affected_service": "encryption_service",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_017",
+      "task_type": "silent_failure",
+      "task_description": "Shadow traffic testing producing spurious errors. Distinguish from production issues.",
+      "metrics": {
+        "production_api": {"cpu": 52, "memory": 58, "error_rate": 0.01, "latency_p99": 380},
+        "shadow_api": {"cpu": 62, "memory": 68, "error_rate": 0.28, "latency_p99": 8500},
+        "traffic_mirror": {"cpu": 45, "memory": 52, "error_rate": 0.0, "latency_p99": 25}
+      },
+      "alerts": [],
+      "logs": [
+        "[traffic_mirror] INFO: Mirroring 10% of production traffic to shadow",
+        "[traffic_mirror] INFO: Shadow traffic rate: 840 req/min",
+        "[production_api] INFO: Serving 8400 req/min, error rate: 0.01%",
+        "[production_api] INFO: All production requests successful",
+        "[shadow_api] ERROR: Database constraint violation",
+        "[shadow_api] ERROR: Duplicate key error on user_id",
+        "[shadow_api] WARN: Test data conflicts with production IDs",
+        "[shadow_api] INFO: Shadow responses not served to clients"
+      ],
+      "service_dependencies": {
+        "traffic_mirror": ["production_api", "shadow_api"],
+        "shadow_api": ["test_database"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "NONE",
+        "affected_service": "",
+        "is_incident": false
+      }
+    },
+    {
+      "id": "hard_018",
+      "task_type": "severity",
+      "task_description": "API versioning mismatch causing backward compatibility break for subset of clients.",
+      "metrics": {
+        "api_v2": {"cpu": 58, "memory": 62, "error_rate": 0.18, "latency_p99": 2800},
+        "api_v3": {"cpu": 52, "memory": 58, "error_rate": 0.02, "latency_p99": 380},
+        "api_gateway": {"cpu": 62, "memory": 68, "error_rate": 0.08, "latency_p99": 1800}
+      },
+      "alerts": [
+        {"service": "api_v2", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.18", "duration": "55m"},
+        {"service": "api_gateway", "type": "ModerateErrorRate", "threshold": "0.05", "current": "0.08", "duration": "50m"}
+      ],
+      "logs": [
+        "[api_v2] ERROR: Field 'user_metadata' not found in response",
+        "[api_v2] ERROR: Schema validation failed for downstream service",
+        "[api_v2] WARN: Backend returned v3 schema, expected v2",
+        "[api_gateway] INFO: Routing /users requests to user_service v3",
+        "[api_gateway] WARN: v2 clients expecting old schema",
+        "[api_v3] INFO: Serving requests with new schema",
+        "[api_v3] DEBUG: Removed deprecated field: user_metadata"
+      ],
+      "service_dependencies": {
+        "api_gateway": ["api_v2", "api_v3"],
+        "api_v2": ["user_service"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P3",
+        "affected_service": "api_v2",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_019",
+      "task_type": "root_cause",
+      "task_description": "Dependency injection framework initialization race condition in distributed deployment.",
+      "metrics": {
+        "service_instance_1": {"cpu": 55, "memory": 62, "error_rate": 0.0, "latency_p99": 380},
+        "service_instance_2": {"cpu": 58, "memory": 65, "error_rate": 0.32, "latency_p99": 15000},
+        "service_instance_3": {"cpu": 52, "memory": 58, "error_rate": 0.0, "latency_p99": 420},
+        "health_checker": {"cpu": 42, "memory": 48, "error_rate": 0.0, "latency_p99": 120}
+      },
+      "alerts": [
+        {"service": "service_instance_2", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.32", "duration": "18m"}
+      ],
+      "logs": [
+        "[service_instance_2] ERROR: NullPointerException in RequestHandler",
+        "[service_instance_2] ERROR: Dependency 'databaseClient' not initialized",
+        "[service_instance_2] WARN: Application context partially loaded",
+        "[service_instance_2] ERROR: Bean initialization order violation",
+        "[service_instance_1] INFO: All dependencies initialized successfully",
+        "[service_instance_3] INFO: Application started normally",
+        "[health_checker] WARN: Instance 2 failing health checks",
+        "[health_checker] INFO: Instances 1 and 3 healthy"
+      ],
+      "service_dependencies": {
+        "service_instance_2": ["database", "cache", "config_service"],
+        "health_checker": ["service_instance_1", "service_instance_2", "service_instance_3"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P3",
+        "affected_service": "service_instance_2",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "hard_020",
+      "task_type": "silent_failure",
+      "task_description": "Feature flag evaluation logic bug affecting only specific user cohort. Subtle behavioral change.",
+      "metrics": {
+        "feature_flag_service": {"cpu": 48, "memory": 55, "error_rate": 0.0, "latency_p99": 180},
+        "application": {"cpu": 52, "memory": 58, "error_rate": 0.0, "latency_p99": 380},
+        "analytics": {"cpu": 45, "memory": 52, "error_rate": 0.0, "latency_p99": 280}
+      },
+      "alerts": [],
+      "logs": [
+        "[feature_flag_service] INFO: Evaluating flag: new_checkout_flow",
+        "[feature_flag_service] DEBUG: User segment: premium, region: EU",
+        "[feature_flag_service] INFO: Flag result: true (expected: false for EU)",
+        "[application] INFO: Serving new checkout flow to user",
+        "[application] DEBUG: User metadata: {tier: premium, region: EU}",
+        "[analytics] WARN: Unexpected feature usage pattern",
+        "[analytics] INFO: new_checkout_flow enabled for 42% of EU users (target: 0%)"
+      ],
+      "service_dependencies": {
+        "application": ["feature_flag_service"],
+        "analytics": ["application"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P4",
+        "affected_service": "feature_flag_service",
+        "is_incident": true
+      }
+    }
+  ]
+}

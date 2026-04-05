@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "constraint-solver-arena"
+version = "1.0.0"
+description = "Constraint Satisfaction Benchmark - Testing LLM planning and scheduling capabilities"
+requires-python = ">=3.10"
+dependencies = [
+    "openenv-core>=0.2.0",
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.0.0",
+    "openai>=1.0.0",
+    "websockets>=12.0",
+]
+
+[project.scripts]
+server = "server.app:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["constraint_solver*", "server*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

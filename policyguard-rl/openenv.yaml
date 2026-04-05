@@ -1,0 +1,207 @@
+name: PolicyGuard-RL
+description: |
+  Multi-agent content moderation environment with 3-tier escalation chain.
+  
+  Addresses Meta's core problem: training AI moderators to make nuanced decisions
+  about content that falls into gray areas (misinformation, hate speech, harassment).
+  
+  Key features:
+  - 3-tier escalation: Tier 1 (fast review) → Tier 2 (senior review) → Tier 3 (appeals)
+  - Agent learns WHEN to escalate vs decide directly
+  - Bias awareness scoring (anchoring, authority, confirmation bias)
+  - 100+ realistic scenarios across 5 content categories
+
+version: 1.0.0
+
+tags:
+  - openenv
+  - content-moderation
+  - multi-agent
+  - escalation-chain
+  - bias-detection
+  - meta-problem
+
+repository: https://github.com/wysh/policyguard-rl
+huggingface_space: wysh/policyguard-rl
+
+models:
+  action:
+    type: object
+    properties:
+      decision:
+        type: string
+        enum: ["allow", "remove", "reduce", "label", "escalate"]
+        description: Moderation decision for current content
+      category:
+        type: string
+        enum: ["misinformation", "hate_speech", "child_safety", "harassment", "violence", "spam", "none"]
+        description: Detected violation category (or none)
+      confidence:
+        type: number
+        minimum: 0.0
+        maximum: 1.0
+        description: Agent's confidence in decision
+      reasoning:
+        type: string
+        description: Explanation of the decision
+      policy_cited:
+        type: string
+        description: Which content policy applies
+      bias_identified:
+        type: string
+        description: Any cognitive bias the agent noticed in its own reasoning
+    required: ["decision", "category"]
+
+  observation:
+    type: object
+    properties:
+      post:
+        type: object
+        properties:
+          id:
+            type: string
+          text:
+            type: string
+          author_history:
+            type: object
+          engagement:
+            type: object
+          context:
+            type: string
+        description: The content to moderate
+      current_tier:
+        type: string
+        enum: ["tier_1", "tier_2", "tier_3"]
+        description: Current position in escalation chain
+      task_name:
+        type: string
+        description: Active task (misinformation, hate_speech, etc.)
+      task_difficulty:
+        type: string
+        enum: ["easy", "medium", "hard"]
+      previous_decisions:
+        type: array
+        description: Decisions from previous tiers (if escalated)
+      feedback:
+        type: string
+        description: Feedback from last action
+      reward:
+        type: number
+        description: Reward from last action
+      done:
+        type: boolean
+        description: Whether episode is complete
+
+  state:
+    type: object
+    properties:
+      episode_id:
+        type: string
+      task_name:
+        type: string
+      task_difficulty:
+        type: string
+      current_post_idx:
+        type: integer
+      current_tier:
+        type: string
+      posts_in_episode:
+        type: integer
+      cumulative_reward:
+        type: number
+      decisions_made:
+        type: integer
+      escalations:
+        type: integer
+      correct_decisions:
+        type: integer
+      done:
+        type: boolean
+      bias_triggers:
+        type: object
+        description: Count of biases identified by agent
+
+tasks:
+  - name: misinformation
+    difficulty: easy
+    description: Detect fake news, satire, misleading claims
+    grader:
+      type: agent
+      weights:
+        correct_decision: 0.40
+        correct_category: 0.20
+        reasoning_quality: 0.15
+        escalation_efficiency: 0.15
+        bias_awareness: 0.10
+
+  - name: hate_speech
+    difficulty: medium
+    description: Context-dependent hate speech detection
+    grader:
+      type: agent
+      weights:
+        correct_decision: 0.40
+        correct_category: 0.20
+        reasoning_quality: 0.15
+        escalation_efficiency: 0.15
+        bias_awareness: 0.10
+
+  - name: child_safety
+    difficulty: hard
+    description: Grooming patterns, age-inappropriate content
+    grader:
+      type: agent
+      weights:
+        correct_decision: 0.50
+        correct_category: 0.20
+        reasoning_quality: 0.10
+        escalation_efficiency: 0.10
+        bias_awareness: 0.10
+
+  - name: harassment
+    difficulty: medium
+    description: Bullying, pile-ons, targeted attacks
+    grader:
+      type: agent
+      weights:
+        correct_decision: 0.40
+        correct_category: 0.20
+        reasoning_quality: 0.15
+        escalation_efficiency: 0.15
+        bias_awareness: 0.10
+
+  - name: violence
+    difficulty: hard
+    description: Threats, graphic content, news vs fiction
+    grader:
+      type: agent
+      weights:
+        correct_decision: 0.45
+        correct_category: 0.20
+        reasoning_quality: 0.15
+        escalation_efficiency: 0.10
+        bias_awareness: 0.10
+
+rewards:
+  description: |
+    Multi-signal reward function with partial progress:
+    - correct_decision (40%): Did agent make the right call?
+    - correct_category (20%): Did agent identify the right violation type?
+    - reasoning_quality (15%): Did agent provide good justification?
+    - escalation_efficiency (15%): Did agent escalate appropriately?
+    - bias_awareness (10%): Did agent recognize cognitive biases?
+
+  penalties:
+    false_negative: -0.50  # Missed actual violation (worst case)
+    false_positive: -0.30  # Over-moderation (censorship)
+    unnecessary_escalation: -0.15  # Wasting senior reviewer time
+    wrong_category: -0.10  # Misclassified violation
+
+inference:
+  script: inference.py
+  model: gpt-4o-mini
+  timeout_minutes: 20
+
+machine:
+  vcpu: 2
+  memory: 8gb

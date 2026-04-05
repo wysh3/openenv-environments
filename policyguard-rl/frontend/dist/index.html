@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PolicyGuard-RL</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0a;
+            color: #e5e5e5;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #222;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: #888;
+            font-size: 1rem;
+        }
+        
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 8px 16px;
+            background: #111;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .card {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .card h2 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-tier { background: #1d4ed8; color: #93c5fd; }
+        .badge-task { background: #7c3aed; color: #c4b5fd; }
+        
+        .tier-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        .tier {
+            text-align: center;
+            padding: 16px 24px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            min-width: 100px;
+            transition: all 0.3s;
+        }
+        
+        .tier.active {
+            border-color: #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+        
+        .tier-num {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        
+        .tier-label {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .arrow {
+            color: #333;
+            font-size: 1.5rem;
+        }
+        
+        .content-box {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .content-text {
+            font-size: 1rem;
+            margin-bottom: 16px;
+            color: #fff;
+        }
+        
+        .content-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .decisions {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .decision-btn {
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: transparent;
+            color: #888;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .decision-btn:hover {
+            border-color: #555;
+            color: #fff;
+        }
+        
+        .decision-btn.allow:hover { border-color: #22c55e; color: #22c55e; }
+        .decision-btn.remove:hover { border-color: #ef4444; color: #ef4444; }
+        .decision-btn.reduce:hover { border-color: #f59e0b; color: #f59e0b; }
+        .decision-btn.label:hover { border-color: #3b82f6; color: #3b82f6; }
+        .decision-btn.escalate:hover { border-color: #8b5cf6; color: #8b5cf6; }
+        
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        
+        .metric {
+            text-align: center;
+            padding: 16px;
+            background: #0a0a0a;
+            border-radius: 8px;
+        }
+        
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .metric-value.green { color: #22c55e; }
+        .metric-value.yellow { color: #f59e0b; }
+        .metric-value.blue { color: #3b82f6; }
+        .metric-value.purple { color: #8b5cf6; }
+        
+        .metric-label {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        
+        select, button.primary {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        
+        select {
+            background: #111;
+            border: 1px solid #333;
+            color: #e5e5e5;
+            flex: 1;
+        }
+        
+        button.primary {
+            background: #3b82f6;
+            border: none;
+            color: #fff;
+            font-weight: 500;
+        }
+        
+        button.primary:hover {
+            background: #2563eb;
+        }
+        
+        button.secondary {
+            padding: 12px 20px;
+            background: transparent;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #888;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        
+        button.secondary:hover {
+            border-color: #555;
+            color: #fff;
+        }
+        
+        .log {
+            background: #0a0a0a;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.8rem;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            padding: 4px 0;
+            color: #666;
+        }
+        
+        .log-entry.start { color: #3b82f6; }
+        .log-entry.step { color: #888; }
+        .log-entry.end { color: #22c55e; }
+        .log-entry.error { color: #ef4444; }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #444;
+            font-size: 0.85rem;
+            border-top: 1px solid #222;
+            margin-top: 40px;
+        }
+        
+        footer a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        @media (max-width: 640px) {
+            .decisions { grid-template-columns: repeat(3, 1fr); }
+            .metrics { grid-template-columns: repeat(2, 1fr); }
+            .tier-flow { flex-wrap: wrap; gap: 10px; }
+            .arrow { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ PolicyGuard-RL</h1>
+            <p class="subtitle">Multi-Agent Content Moderation Environment</p>
+            <div class="status">
+                <div class="status-dot"></div>
+                <span id="status-text">Ready</span>
+            </div>
+        </header>
+        
+        <div class="controls">
+            <select id="task-select">
+                <option value="misinformation">Misinformation (Easy)</option>
+                <option value="hate_speech">Hate Speech (Medium)</option>
+                <option value="harassment">Harassment (Medium)</option>
+                <option value="child_safety">Child Safety (Hard)</option>
+                <option value="violence">Violence (Hard)</option>
+            </select>
+            <button class="primary" id="start-btn">Start Episode</button>
+            <button class="secondary" id="reset-btn">Reset</button>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>Escalation Chain</h2>
+                <span class="badge badge-tier" id="tier-badge">Tier 1</span>
+            </div>
+            <div class="tier-flow">
+                <div class="tier active" id="tier-1">
+                    <div class="tier-num">T1</div>
+                    <div class="tier-label">First-Line</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="tier" id="tier-2">
+                    <div class="tier-num">T2</div>
+                    <div class="tier-label">Senior</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="tier" id="tier-3">
+                    <div class="tier-num">T3</div>
+                    <div class="tier-label">Appeals</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>Content to Review</h2>
+                <span class="badge badge-task" id="task-badge">--</span>
+            </div>
+            <div class="content-box">
+                <div class="content-text" id="content-text">
+                    Click "Start Episode" to begin reviewing content.
+                </div>
+                <div class="content-meta">
+                    <span>👤 <span id="author">--</span></span>
+                    <span>❤️ <span id="likes">0</span></span>
+                    <span>🔄 <span id="shares">0</span></span>
+                    <span>⚠️ <span id="reports">0</span></span>
+                </div>
+            </div>
+            <div class="decisions">
+                <button class="decision-btn allow" onclick="decide('allow')">✓ Allow</button>
+                <button class="decision-btn remove" onclick="decide('remove')">✗ Remove</button>
+                <button class="decision-btn reduce" onclick="decide('reduce')">↓ Reduce</button>
+                <button class="decision-btn label" onclick="decide('label')">⚑ Label</button>
+                <button class="decision-btn escalate" onclick="decide('escalate')">↑ Escalate</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>Metrics</h2>
+            </div>
+            <div class="metrics">
+                <div class="metric">
+                    <div class="metric-value green" id="accuracy">0%</div>
+                    <div class="metric-label">Accuracy</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value yellow" id="escalation">0%</div>
+                    <div class="metric-label">Escalation</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value blue" id="score">0.00</div>
+                    <div class="metric-label">Score</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value purple" id="steps">0</div>
+                    <div class="metric-label">Steps</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>Activity Log</h2>
+            </div>
+            <div class="log" id="log">
+                <div class="log-entry">System ready. Select a task and start an episode.</div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>OpenEnv Hackathon 2026 • <a href="/docs">API Docs</a> • <a href="https://github.com/wysh/policyguard-rl">GitHub</a></p>
+        </footer>
+    </div>
+    
+    <script>
+        const API = window.location.origin;
+        let state = null;
+        let totalDecisions = 0;
+        let escalations = 0;
+        let correct = 0;
+        let stepCount = 0;
+        let cumulativeReward = 0;
+        
+        function log(msg, type = 'step') {
+            const el = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            el.appendChild(entry);
+            el.scrollTop = el.scrollHeight;
+        }
+        
+        function updateTier(tier) {
+            ['tier-1', 'tier-2', 'tier-3'].forEach(t => {
+                document.getElementById(t).classList.remove('active');
+            });
+            const tierNum = tier.replace('tier_', '');
+            document.getElementById(`tier-${tierNum}`).classList.add('active');
+            document.getElementById('tier-badge').textContent = `Tier ${tierNum}`;
+        }
+        
+        function updateUI(obs) {
+            if (!obs) return;
+            
+            const post = obs.post || {};
+            document.getElementById('content-text').textContent = post.text || 'No content';
+            document.getElementById('task-badge').textContent = obs.task_name || '--';
+            
+            const eng = post.engagement || {};
+            document.getElementById('likes').textContent = eng.likes || 0;
+            document.getElementById('shares').textContent = eng.shares || 0;
+            document.getElementById('reports').textContent = eng.reports || 0;
+            
+            const auth = post.author_history || {};
+            document.getElementById('author').textContent = `${auth.account_age_days || 0}d, ${auth.violations || 0} violations`;
+            
+            updateTier(obs.current_tier || 'tier_1');
+            
+            document.getElementById('steps').textContent = stepCount;
+            document.getElementById('accuracy').textContent = totalDecisions > 0 ? `${Math.round(correct / totalDecisions * 100)}%` : '0%';
+            document.getElementById('escalation').textContent = totalDecisions > 0 ? `${Math.round(escalations / (totalDecisions + escalations) * 100)}%` : '0%';
+            document.getElementById('score').textContent = cumulativeReward.toFixed(2);
+        }
+        
+        async function startEpisode() {
+            const task = document.getElementById('task-select').value;
+            try {
+                const res = await fetch(`${API}/reset`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ task })
+                });
+                state = await res.json();
+                totalDecisions = 0;
+                escalations = 0;
+                correct = 0;
+                stepCount = 0;
+                cumulativeReward = 0;
+                updateUI(state);
+                log(`Started ${task} episode`, 'start');
+            } catch (e) {
+                log(`Error: ${e.message}`, 'error');
+            }
+        }
+        
+        async function decide(decision) {
+            if (!state || state.done) {
+                log('No active episode', 'error');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API}/step`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        decision,
+                        category: state.task_name || 'none',
+                        confidence: 0.8,
+                        reasoning: `User selected ${decision}`
+                    })
+                });
+                state = await res.json();
+                stepCount++;
+                
+                if (decision === 'escalate') {
+                    escalations++;
+                } else {
+                    totalDecisions++;
+                }
+                
+                cumulativeReward += state.reward || 0;
+                updateUI(state);
+                
+                log(`${decision.toUpperCase()} → reward: ${(state.reward || 0).toFixed(2)}`, 'step');
+                
+                if (state.done) {
+                    log(`Episode complete! Final score: ${cumulativeReward.toFixed(2)}`, 'end');
+                }
+            } catch (e) {
+                log(`Error: ${e.message}`, 'error');
+            }
+        }
+        
+        function resetUI() {
+            state = null;
+            totalDecisions = 0;
+            escalations = 0;
+            correct = 0;
+            stepCount = 0;
+            cumulativeReward = 0;
+            document.getElementById('content-text').textContent = 'Click "Start Episode" to begin reviewing content.';
+            document.getElementById('accuracy').textContent = '0%';
+            document.getElementById('escalation').textContent = '0%';
+            document.getElementById('score').textContent = '0.00';
+            document.getElementById('steps').textContent = '0';
+            updateTier('tier_1');
+            log('Reset', 'start');
+        }
+        
+        document.getElementById('start-btn').addEventListener('click', startEpisode);
+        document.getElementById('reset-btn').addEventListener('click', resetUI);
+    </script>
+</body>
+</html>

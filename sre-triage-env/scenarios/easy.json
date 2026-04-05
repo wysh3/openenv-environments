@@ -1,0 +1,541 @@
+{
+  "difficulty": "easy",
+  "description": "Clear single-service failures with obvious indicators",
+  "scenarios": [
+    {
+      "id": "easy_001",
+      "task_type": "severity",
+      "task_description": "Classify the severity of this incident based on the metrics, alerts, and logs provided. Response should include severity (P1-P5), affected service, and reasoning.",
+      "metrics": {
+        "api_gateway": {"cpu": 15, "memory": 42, "error_rate": 0.01, "latency_p99": 120},
+        "user_service": {"cpu": 89, "memory": 95, "error_rate": 0.45, "latency_p99": 8500},
+        "db_primary": {"cpu": 22, "memory": 58, "error_rate": 0.0, "latency_p99": 15}
+      },
+      "alerts": [
+        {"service": "user_service", "type": "HighErrorRate", "threshold": "0.05", "current": "0.45", "duration": "3m"},
+        {"service": "user_service", "type": "HighMemory", "threshold": "85%", "current": "95%", "duration": "5m"}
+      ],
+      "logs": [
+        "[user_service] ERROR: OutOfMemoryError at UserController.java:234",
+        "[user_service] ERROR: Failed to process login request - heap exhausted",
+        "[api_gateway] INFO: Increased retry attempts to user_service"
+      ],
+      "service_dependencies": {
+        "api_gateway": ["user_service", "auth_service"],
+        "user_service": ["db_primary", "cache_redis"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P2",
+        "affected_service": "user_service",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "easy_002",
+      "task_type": "root_cause",
+      "task_description": "Identify the root cause service and assess severity. The system is experiencing degraded performance.",
+      "metrics": {
+        "web_frontend": {"cpu": 25, "memory": 45, "error_rate": 0.02, "latency_p99": 450},
+        "payment_service": {"cpu": 95, "memory": 72, "error_rate": 0.0, "latency_p99": 12000},
+        "notification_service": {"cpu": 18, "memory": 38, "error_rate": 0.0, "latency_p99": 95}
+      },
+      "alerts": [
+        {"service": "payment_service", "type": "HighCPU", "threshold": "80%", "current": "95%", "duration": "8m"},
+        {"service": "web_frontend", "type": "SlowResponse", "threshold": "300ms", "current": "450ms", "duration": "8m"}
+      ],
+      "logs": [
+        "[payment_service] WARN: Database query timeout after 10s",
+        "[payment_service] WARN: Retry queue building up: 2400 items",
+        "[web_frontend] INFO: Payment requests timing out"
+      ],
+      "service_dependencies": {
+        "web_frontend": ["payment_service", "user_service"],
+        "payment_service": ["db_payments", "fraud_detector"]
+      },
+      "previous_incidents": [
+        {"date": "2024-01-15", "service": "payment_service", "cause": "database connection pool exhausted"}
+      ],
+      "ground_truth": {
+        "severity": "P1",
+        "affected_service": "payment_service",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "easy_003",
+      "task_type": "severity",
+      "task_description": "Assess the severity level of the current system state.",
+      "metrics": {
+        "cdn": {"cpu": 12, "memory": 28, "error_rate": 0.0, "latency_p99": 45},
+        "image_processor": {"cpu": 55, "memory": 68, "error_rate": 0.12, "latency_p99": 3200}
+      },
+      "alerts": [
+        {"service": "image_processor", "type": "ModerateErrorRate", "threshold": "0.05", "current": "0.12", "duration": "15m"}
+      ],
+      "logs": [
+        "[image_processor] ERROR: Failed to process image format HEIC",
+        "[image_processor] WARN: Unsupported format, returning default thumbnail",
+        "[cdn] INFO: Serving cached thumbnails"
+      ],
+      "service_dependencies": {
+        "cdn": ["image_processor", "storage_s3"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P3",
+        "affected_service": "image_processor",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "easy_004",
+      "task_type": "silent_failure",
+      "task_description": "Determine if there is an actual incident occurring. Some metrics may look concerning but could be normal operational variance.",
+      "metrics": {
+        "analytics_service": {"cpu": 72, "memory": 81, "error_rate": 0.0, "latency_p99": 450},
+        "data_warehouse": {"cpu": 88, "memory": 92, "error_rate": 0.0, "latency_p99": 2100}
+      },
+      "alerts": [],
+      "logs": [
+        "[analytics_service] INFO: Running scheduled batch job: daily_aggregation",
+        "[data_warehouse] INFO: Processing 2.4M records",
+        "[analytics_service] INFO: Job progress: 68% complete"
+      ],
+      "service_dependencies": {
+        "analytics_service": ["data_warehouse", "metrics_store"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "NONE",
+        "affected_service": "",
+        "is_incident": false
+      }
+    },
+    {
+      "id": "easy_005",
+      "task_type": "root_cause",
+      "task_description": "Multiple services showing degradation. Identify the root cause.",
+      "metrics": {
+        "api_gateway": {"cpu": 45, "memory": 58, "error_rate": 0.08, "latency_p99": 890},
+        "auth_service": {"cpu": 92, "memory": 88, "error_rate": 0.35, "latency_p99": 15000},
+        "user_service": {"cpu": 38, "memory": 52, "error_rate": 0.06, "latency_p99": 780}
+      },
+      "alerts": [
+        {"service": "auth_service", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.35", "duration": "4m"},
+        {"service": "api_gateway", "type": "ElevatedErrors", "threshold": "0.05", "current": "0.08", "duration": "4m"}
+      ],
+      "logs": [
+        "[auth_service] ERROR: Redis connection refused: Connection timeout",
+        "[auth_service] ERROR: Session validation failed - cache unavailable",
+        "[api_gateway] WARN: Auth failures increasing",
+        "[user_service] WARN: Unauthenticated requests being rejected"
+      ],
+      "service_dependencies": {
+        "api_gateway": ["auth_service", "user_service"],
+        "auth_service": ["redis_sessions", "db_users"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P1",
+        "affected_service": "auth_service",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "easy_006",
+      "task_type": "severity",
+      "task_description": "Rate the severity of the current system condition.",
+      "metrics": {
+        "search_service": {"cpu": 68, "memory": 74, "error_rate": 0.18, "latency_p99": 4200},
+        "elasticsearch": {"cpu": 82, "memory": 91, "error_rate": 0.0, "latency_p99": 3800}
+      },
+      "alerts": [
+        {"service": "search_service", "type": "HighErrorRate", "threshold": "0.05", "current": "0.18", "duration": "6m"},
+        {"service": "elasticsearch", "type": "HighMemory", "threshold": "85%", "current": "91%", "duration": "10m"}
+      ],
+      "logs": [
+        "[search_service] ERROR: Search query timeout",
+        "[search_service] ERROR: Elasticsearch circuit breaker tripped",
+        "[elasticsearch] WARN: JVM heap pressure: 91%"
+      ],
+      "service_dependencies": {
+        "search_service": ["elasticsearch", "cache_redis"]
+      },
+      "previous_incidents": [
+        {"date": "2024-02-01", "service": "elasticsearch", "cause": "heap memory exhaustion"}
+      ],
+      "ground_truth": {
+        "severity": "P2",
+        "affected_service": "search_service",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "easy_007",
+      "task_type": "silent_failure",
+      "task_description": "Investigate whether this represents a true incident or expected behavior.",
+      "metrics": {
+        "backup_service": {"cpu": 45, "memory": 62, "error_rate": 0.0, "latency_p99": 1200},
+        "storage_s3": {"cpu": 5, "memory": 15, "error_rate": 0.0, "latency_p99": 80}
+      },
+      "alerts": [],
+      "logs": [
+        "[backup_service] INFO: Incremental backup started",
+        "[backup_service] INFO: Backing up 145GB of data",
+        "[storage_s3] INFO: Upload bandwidth: 850 Mbps"
+      ],
+      "service_dependencies": {
+        "backup_service": ["storage_s3", "db_primary"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "NONE",
+        "affected_service": "",
+        "is_incident": false
+      }
+    },
+    {
+      "id": "easy_008",
+      "task_type": "root_cause",
+      "task_description": "System experiencing widespread issues. Find the root cause service.",
+      "metrics": {
+        "web_app": {"cpu": 48, "memory": 55, "error_rate": 0.15, "latency_p99": 2400},
+        "database": {"cpu": 98, "memory": 96, "error_rate": 0.0, "latency_p99": 25000},
+        "cache": {"cpu": 22, "memory": 35, "error_rate": 0.0, "latency_p99": 12}
+      },
+      "alerts": [
+        {"service": "database", "type": "CriticalCPU", "threshold": "90%", "current": "98%", "duration": "12m"},
+        {"service": "database", "type": "CriticalMemory", "threshold": "90%", "current": "96%", "duration": "12m"},
+        {"service": "web_app", "type": "HighErrorRate", "threshold": "0.05", "current": "0.15", "duration": "10m"}
+      ],
+      "logs": [
+        "[database] ERROR: Slow query detected: SELECT * taking 18s",
+        "[database] WARN: Connection pool at 98% capacity",
+        "[web_app] ERROR: Database query timeout",
+        "[web_app] ERROR: Failed to load user dashboard"
+      ],
+      "service_dependencies": {
+        "web_app": ["database", "cache"],
+        "api": ["database"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P1",
+        "affected_service": "database",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "easy_009",
+      "task_type": "severity",
+      "task_description": "Evaluate the severity of the current operational state.",
+      "metrics": {
+        "email_service": {"cpu": 58, "memory": 64, "error_rate": 0.22, "latency_p99": 5400}
+      },
+      "alerts": [
+        {"service": "email_service", "type": "HighErrorRate", "threshold": "0.05", "current": "0.22", "duration": "20m"}
+      ],
+      "logs": [
+        "[email_service] ERROR: SMTP connection failed to mail.provider.com",
+        "[email_service] ERROR: Email delivery failed: Connection refused",
+        "[email_service] WARN: Retry queue length: 8400 emails"
+      ],
+      "service_dependencies": {
+        "email_service": ["smtp_relay", "template_engine"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P3",
+        "affected_service": "email_service",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "easy_010",
+      "task_type": "silent_failure",
+      "task_description": "Determine if system metrics indicate an actual problem or normal operation.",
+      "metrics": {
+        "ml_training": {"cpu": 95, "memory": 89, "error_rate": 0.0, "latency_p99": 800},
+        "gpu_cluster": {"cpu": 92, "memory": 85, "error_rate": 0.0, "latency_p99": 450}
+      },
+      "alerts": [],
+      "logs": [
+        "[ml_training] INFO: Training model: recommendation_v5",
+        "[ml_training] INFO: Epoch 42/100, loss: 0.0231",
+        "[gpu_cluster] INFO: GPU utilization: 94%"
+      ],
+      "service_dependencies": {
+        "ml_training": ["gpu_cluster", "data_warehouse"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "NONE",
+        "affected_service": "",
+        "is_incident": false
+      }
+    },
+    {
+      "id": "easy_011",
+      "task_type": "severity",
+      "task_description": "Classify incident severity based on system indicators.",
+      "metrics": {
+        "checkout_service": {"cpu": 78, "memory": 82, "error_rate": 0.28, "latency_p99": 6200},
+        "inventory_service": {"cpu": 35, "memory": 48, "error_rate": 0.02, "latency_p99": 180}
+      },
+      "alerts": [
+        {"service": "checkout_service", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.28", "duration": "5m"}
+      ],
+      "logs": [
+        "[checkout_service] ERROR: Payment gateway timeout",
+        "[checkout_service] ERROR: Transaction failed: Gateway unreachable",
+        "[checkout_service] ERROR: Order processing halted"
+      ],
+      "service_dependencies": {
+        "checkout_service": ["payment_gateway", "inventory_service"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P1",
+        "affected_service": "checkout_service",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "easy_012",
+      "task_type": "root_cause",
+      "task_description": "Identify which service is causing the cascading failures.",
+      "metrics": {
+        "api": {"cpu": 62, "memory": 68, "error_rate": 0.12, "latency_p99": 3200},
+        "cache_redis": {"cpu": 12, "memory": 98, "error_rate": 0.0, "latency_p99": 8500},
+        "web": {"cpu": 45, "memory": 52, "error_rate": 0.08, "latency_p99": 1800}
+      },
+      "alerts": [
+        {"service": "cache_redis", "type": "CriticalMemory", "threshold": "90%", "current": "98%", "duration": "8m"},
+        {"service": "api", "type": "HighErrorRate", "threshold": "0.05", "current": "0.12", "duration": "7m"}
+      ],
+      "logs": [
+        "[cache_redis] ERROR: OOM - cannot allocate memory",
+        "[cache_redis] WARN: Evicting keys aggressively",
+        "[api] ERROR: Cache miss rate: 89%",
+        "[api] WARN: Falling back to database queries"
+      ],
+      "service_dependencies": {
+        "api": ["cache_redis", "database"],
+        "web": ["api"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P2",
+        "affected_service": "cache_redis",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "easy_013",
+      "task_type": "severity",
+      "task_description": "Determine the priority level for this incident.",
+      "metrics": {
+        "monitoring_service": {"cpu": 52, "memory": 68, "error_rate": 0.15, "latency_p99": 2800}
+      },
+      "alerts": [
+        {"service": "monitoring_service", "type": "ModerateErrorRate", "threshold": "0.05", "current": "0.15", "duration": "25m"}
+      ],
+      "logs": [
+        "[monitoring_service] ERROR: Failed to push metrics to backend",
+        "[monitoring_service] WARN: Metric buffer growing: 45000 datapoints",
+        "[monitoring_service] INFO: Attempting reconnection"
+      ],
+      "service_dependencies": {
+        "monitoring_service": ["metrics_backend", "alerting_system"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P4",
+        "affected_service": "monitoring_service",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "easy_014",
+      "task_type": "silent_failure",
+      "task_description": "Assess whether the current metrics represent a genuine incident.",
+      "metrics": {
+        "cdn_cache": {"cpu": 28, "memory": 55, "error_rate": 0.0, "latency_p99": 85},
+        "origin_server": {"cpu": 18, "memory": 35, "error_rate": 0.0, "latency_p99": 120}
+      },
+      "alerts": [],
+      "logs": [
+        "[cdn_cache] INFO: Cache hit rate: 94.2%",
+        "[cdn_cache] INFO: Serving 12k req/s",
+        "[origin_server] INFO: Backend requests: 720 req/s"
+      ],
+      "service_dependencies": {
+        "cdn_cache": ["origin_server"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "NONE",
+        "affected_service": "",
+        "is_incident": false
+      }
+    },
+    {
+      "id": "easy_015",
+      "task_type": "root_cause",
+      "task_description": "Multiple services affected. Identify the failing component.",
+      "metrics": {
+        "mobile_api": {"cpu": 72, "memory": 68, "error_rate": 0.18, "latency_p99": 4200},
+        "push_notifications": {"cpu": 95, "memory": 92, "error_rate": 0.42, "latency_p99": 18000},
+        "user_preferences": {"cpu": 38, "memory": 45, "error_rate": 0.04, "latency_p99": 280}
+      },
+      "alerts": [
+        {"service": "push_notifications", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.42", "duration": "6m"},
+        {"service": "mobile_api", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.18", "duration": "5m"}
+      ],
+      "logs": [
+        "[push_notifications] ERROR: FCM API rate limit exceeded",
+        "[push_notifications] ERROR: Failed to deliver notification batch",
+        "[mobile_api] WARN: Push notification timeouts increasing"
+      ],
+      "service_dependencies": {
+        "mobile_api": ["push_notifications", "user_preferences"],
+        "push_notifications": ["fcm_gateway", "apns_gateway"]
+      },
+      "previous_incidents": [
+        {"date": "2024-01-20", "service": "push_notifications", "cause": "rate limit exceeded during campaign"}
+      ],
+      "ground_truth": {
+        "severity": "P2",
+        "affected_service": "push_notifications",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "easy_016",
+      "task_type": "severity",
+      "task_description": "Rate the urgency of addressing this situation.",
+      "metrics": {
+        "reporting_service": {"cpu": 62, "memory": 71, "error_rate": 0.08, "latency_p99": 1800}
+      },
+      "alerts": [
+        {"service": "reporting_service", "type": "ModerateErrorRate", "threshold": "0.05", "current": "0.08", "duration": "30m"}
+      ],
+      "logs": [
+        "[reporting_service] ERROR: Failed to generate monthly report",
+        "[reporting_service] WARN: Report generation timeout after 60s",
+        "[reporting_service] INFO: Retrying with reduced dataset"
+      ],
+      "service_dependencies": {
+        "reporting_service": ["data_warehouse", "pdf_generator"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P4",
+        "affected_service": "reporting_service",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "easy_017",
+      "task_type": "silent_failure",
+      "task_description": "Verify if this is an incident or expected system behavior.",
+      "metrics": {
+        "log_aggregator": {"cpu": 68, "memory": 74, "error_rate": 0.0, "latency_p99": 850}
+      },
+      "alerts": [],
+      "logs": [
+        "[log_aggregator] INFO: Processing log streams from 450 sources",
+        "[log_aggregator] INFO: Ingestion rate: 2.4M events/min",
+        "[log_aggregator] INFO: Buffer utilization: 72%"
+      ],
+      "service_dependencies": {
+        "log_aggregator": ["elasticsearch", "kafka"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "NONE",
+        "affected_service": "",
+        "is_incident": false
+      }
+    },
+    {
+      "id": "easy_018",
+      "task_type": "root_cause",
+      "task_description": "Determine which service is the source of system-wide problems.",
+      "metrics": {
+        "frontend": {"cpu": 55, "memory": 58, "error_rate": 0.22, "latency_p99": 8400},
+        "cdn": {"cpu": 98, "memory": 89, "error_rate": 0.0, "latency_p99": 12000},
+        "backend": {"cpu": 32, "memory": 42, "error_rate": 0.01, "latency_p99": 180}
+      },
+      "alerts": [
+        {"service": "cdn", "type": "CriticalCPU", "threshold": "90%", "current": "98%", "duration": "10m"},
+        {"service": "frontend", "type": "HighErrorRate", "threshold": "0.05", "current": "0.22", "duration": "9m"}
+      ],
+      "logs": [
+        "[cdn] ERROR: Origin shield overloaded - request queue: 28000",
+        "[cdn] WARN: Cache eviction rate exceeding normal by 400%",
+        "[frontend] ERROR: Asset load timeout from CDN",
+        "[frontend] WARN: Falling back to direct origin fetch"
+      ],
+      "service_dependencies": {
+        "frontend": ["cdn", "backend"],
+        "cdn": ["origin_servers"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P1",
+        "affected_service": "cdn",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "easy_019",
+      "task_type": "severity",
+      "task_description": "Classify the severity of the observed system behavior.",
+      "metrics": {
+        "file_upload": {"cpu": 72, "memory": 78, "error_rate": 0.35, "latency_p99": 15000}
+      },
+      "alerts": [
+        {"service": "file_upload", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.35", "duration": "8m"}
+      ],
+      "logs": [
+        "[file_upload] ERROR: S3 upload failed: Access Denied",
+        "[file_upload] ERROR: Unable to store file: permission error",
+        "[file_upload] ERROR: Retry exhausted after 5 attempts"
+      ],
+      "service_dependencies": {
+        "file_upload": ["storage_s3", "virus_scanner"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P2",
+        "affected_service": "file_upload",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "easy_020",
+      "task_type": "silent_failure",
+      "task_description": "Evaluate if current system state requires incident response.",
+      "metrics": {
+        "batch_processor": {"cpu": 82, "memory": 78, "error_rate": 0.0, "latency_p99": 650}
+      },
+      "alerts": [],
+      "logs": [
+        "[batch_processor] INFO: Processing nightly job: user_cleanup",
+        "[batch_processor] INFO: Processed 1.2M records",
+        "[batch_processor] INFO: Estimated completion: 15 minutes"
+      ],
+      "service_dependencies": {
+        "batch_processor": ["database", "archive_storage"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "NONE",
+        "affected_service": "",
+        "is_incident": false
+      }
+    }
+  ]
+}

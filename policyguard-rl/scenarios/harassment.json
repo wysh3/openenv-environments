@@ -1,0 +1,212 @@
+[
+  {
+    "id": "harass_001",
+    "text": "You're such an idiot. How do you even function in daily life? 🤡",
+    "author_history": {"account_age_days": 400, "previous_violations": 1, "follower_count": 670},
+    "engagement": {"likes": 45, "shares": 5, "comments": 23, "reports": 3},
+    "context": "Reply to someone's opinion post. First interaction between users.",
+    "ground_truth": {
+      "correct_decision": "label",
+      "category": "harassment",
+      "explanation": "Personal attack but not severe harassment. Add warning but don't remove.",
+      "trap_type": "severity_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "harass_002",
+    "text": "I know where you live. I'm going to show up at your house and make you pay for what you said.",
+    "author_history": {"account_age_days": 100, "previous_violations": 2, "follower_count": 120},
+    "engagement": {"likes": 2, "shares": 0, "comments": 1, "reports": 5},
+    "context": "Threat after online argument.",
+    "ground_truth": {
+      "correct_decision": "remove",
+      "category": "harassment",
+      "explanation": "Direct threat with implied violence. Immediate removal required.",
+      "trap_type": "none",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "harass_003",
+    "text": "Everyone go report @username. They're a terrible person and deserve to be banned.",
+    "author_history": {"account_age_days": 800, "previous_violations": 0, "follower_count": 12000},
+    "engagement": {"likes": 890, "shares": 234, "comments": 456, "reports": 12},
+    "context": "Call to mass report another user without specific reason given.",
+    "ground_truth": {
+      "correct_decision": "remove",
+      "category": "harassment",
+      "explanation": "Coordinated harassment attempt. Mass reporting call is platform manipulation.",
+      "trap_type": "popularity_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "harass_004",
+    "text": "I respectfully disagree with your analysis. Here's why I think you're wrong about the economic data...",
+    "author_history": {"account_age_days": 1500, "previous_violations": 0, "follower_count": 5600},
+    "engagement": {"likes": 234, "shares": 45, "comments": 89, "reports": 0},
+    "context": "Polite disagreement in professional discussion.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Civil disagreement. No harassment, just differing opinion.",
+      "trap_type": "disagreement_bias",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "harass_005",
+    "text": "Die. Just die. Nobody wants you here. Kill yourself.",
+    "author_history": {"account_age_days": 60, "previous_violations": 3, "follower_count": 45},
+    "engagement": {"likes": 5, "shares": 0, "comments": 2, "reports": 8},
+    "context": "Response to someone's selfie post.",
+    "ground_truth": {
+      "correct_decision": "remove",
+      "category": "harassment",
+      "explanation": "Severe harassment with suicide encouragement. Immediate removal.",
+      "trap_type": "none",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "harass_006",
+    "text": "Thread about why @celebrity is problematic (1/20): Let's look at their history of statements...",
+    "author_history": {"account_age_days": 900, "previous_violations": 0, "follower_count": 8900},
+    "engagement": {"likes": 4500, "shares": 1200, "comments": 2300, "reports": 45},
+    "context": "Critical thread about public figure with documented evidence.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Criticism of public figure with evidence. Not harassment.",
+      "trap_type": "criticism_vs_harassment_bias",
+      "difficulty": "hard"
+    }
+  },
+  {
+    "id": "harass_007",
+    "text": "Hey @username remember when you posted that embarrassing thing 5 years ago? Here's the screenshot 📸",
+    "author_history": {"account_age_days": 500, "previous_violations": 1, "follower_count": 3400},
+    "engagement": {"likes": 890, "shares": 234, "comments": 456, "reports": 23},
+    "context": "Digging up old posts to embarrass someone.",
+    "ground_truth": {
+      "correct_decision": "remove",
+      "category": "harassment",
+      "explanation": "Doxxing old content to harass. Targeted embarrassment campaign.",
+      "trap_type": "entertainment_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "harass_008",
+    "text": "Your art sucks. Go back to school. This is embarrassing.",
+    "author_history": {"account_age_days": 300, "previous_violations": 0, "follower_count": 890},
+    "engagement": {"likes": 12, "shares": 2, "comments": 8, "reports": 2},
+    "context": "Harsh criticism of artist's work.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Harsh but not harassment. Criticism of work, not personal attack.",
+      "trap_type": "tone_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "harass_009",
+    "text": "📍 @username's workplace is [company name]. Let's all call their boss and get them fired!",
+    "author_history": {"account_age_days": 200, "previous_violations": 2, "follower_count": 2300},
+    "engagement": {"likes": 567, "shares": 123, "comments": 234, "reports": 45},
+    "context": "Doxxing workplace and calling for real-world consequences.",
+    "ground_truth": {
+      "correct_decision": "remove",
+      "category": "harassment",
+      "explanation": "Doxxing + coordinated real-world harassment. Severe violation.",
+      "trap_type": "none",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "harass_010",
+    "text": "I'm so disappointed in you. As your fan, I expected better. This really hurts.",
+    "author_history": {"account_age_days": 600, "previous_violations": 0, "follower_count": 120},
+    "engagement": {"likes": 23, "shares": 2, "comments": 12, "reports": 0},
+    "context": "Fan expressing disappointment to content creator.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Expression of disappointment. Not harassment.",
+      "trap_type": "emotional_content_bias",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "harass_011",
+    "text": "You're a fraud and everyone should know it. You plagiarized this paper. Here's proof: [link to comparison]",
+    "author_history": {"account_age_days": 1200, "previous_violations": 0, "follower_count": 4500},
+    "engagement": {"likes": 2300, "shares": 890, "comments": 567, "reports": 34},
+    "context": "Accusation with documented evidence of plagiarism.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Accusation with evidence. If proven true, this is legitimate whistleblowing.",
+      "trap_type": "accusation_bias",
+      "difficulty": "hard"
+    }
+  },
+  {
+    "id": "harass_012",
+    "text": "lmao ratio + you fell off + nobody asked + cry about it 😂",
+    "author_history": {"account_age_days": 150, "previous_violations": 0, "follower_count": 2300},
+    "engagement": {"likes": 890, "shares": 45, "comments": 123, "reports": 5},
+    "context": "Standard Twitter dunk culture response.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Standard social media culture. Rude but not harassment.",
+      "trap_type": "platform_culture_bias",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "harass_013",
+    "text": "Posting @username's home address: [REDACTED]. They deserve what's coming to them.",
+    "author_history": {"account_age_days": 50, "previous_violations": 1, "follower_count": 67},
+    "engagement": {"likes": 12, "shares": 3, "comments": 8, "reports": 15},
+    "context": "Doxxing with implied threat.",
+    "ground_truth": {
+      "correct_decision": "remove",
+      "category": "harassment",
+      "explanation": "Doxxing personal address with threat. Severe safety concern.",
+      "trap_type": "none",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "harass_014",
+    "text": "I used to respect you but after that take I've lost all respect. Unfollowing.",
+    "author_history": {"account_age_days": 700, "previous_violations": 0, "follower_count": 340},
+    "engagement": {"likes": 45, "shares": 5, "comments": 23, "reports": 0},
+    "context": "User expressing lost respect.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Expression of opinion change. Not harassment.",
+      "trap_type": "negative_feedback_bias",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "harass_015",
+    "text": "Every single day I'm going to reply to every tweet you make until you apologize. Day 47.",
+    "author_history": {"account_age_days": 400, "previous_violations": 2, "follower_count": 890},
+    "engagement": {"likes": 23, "shares": 5, "comments": 12, "reports": 8},
+    "context": "Sustained campaign targeting one user.",
+    "ground_truth": {
+      "correct_decision": "remove",
+      "category": "harassment",
+      "explanation": "Sustained targeted harassment campaign. Pattern of behavior.",
+      "trap_type": "persistence_bias",
+      "difficulty": "medium"
+    }
+  }
+]

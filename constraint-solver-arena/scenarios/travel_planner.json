@@ -1,0 +1,437 @@
+{
+  "scenarios": [
+    {
+      "id": "travel_001",
+      "task_type": "travel_planner",
+      "task_description": "Plan a day trip in San Francisco with a $200 budget. Visit at least 3 attractions starting at 9 AM and ending by 6 PM.",
+      "problem_data": {
+        "destinations": [
+          {"id": "A1", "name": "Golden Gate Bridge", "cost": 0, "duration_minutes": 90, "location": "north"},
+          {"id": "A2", "name": "Alcatraz Island", "cost": 45, "duration_minutes": 180, "location": "bay", "requires_ferry": true},
+          {"id": "A3", "name": "Fisherman's Wharf", "cost": 0, "duration_minutes": 120, "location": "north"},
+          {"id": "A4", "name": "Chinatown", "cost": 0, "duration_minutes": 90, "location": "downtown"},
+          {"id": "A5", "name": "Cable Car Ride", "cost": 8, "duration_minutes": 30, "location": "downtown"},
+          {"id": "A6", "name": "Lunch at Pier 39", "cost": 35, "duration_minutes": 60, "location": "north"}
+        ],
+        "budget": 200,
+        "time_constraints": {
+          "day_start": "09:00",
+          "day_end": "18:00"
+        },
+        "dependencies": [
+          {"before": "Golden Gate Bridge", "after": "Fisherman's Wharf", "reason": "Both in north, logical order"},
+          {"before": "Fisherman's Wharf", "after": "Lunch at Pier 39", "reason": "Lunch follows sightseeing"}
+        ],
+        "travel_times": {
+          "north_to_downtown": 30,
+          "downtown_to_bay": 20,
+          "north_to_bay": 25
+        }
+      },
+      "hard_constraints": [
+        "Total cost must not exceed $200",
+        "All activities must be between 09:00 and 18:00",
+        "No overlapping activities",
+        "Must visit at least 3 attractions",
+        "Dependencies must be respected (A before B)"
+      ],
+      "soft_constraints": ["Minimize travel time between locations"],
+      "ground_truth": {
+        "sample_valid_itinerary": [
+          {"activity": "Golden Gate Bridge", "start_time": "09:00", "end_time": "10:30", "cost": 0},
+          {"activity": "Fisherman's Wharf", "start_time": "11:00", "end_time": "13:00", "cost": 0},
+          {"activity": "Lunch at Pier 39", "start_time": "13:00", "end_time": "14:00", "cost": 35},
+          {"activity": "Cable Car Ride", "start_time": "14:30", "end_time": "15:00", "cost": 8},
+          {"activity": "Chinatown", "start_time": "15:00", "end_time": "16:30", "cost": 0}
+        ],
+        "total_cost": 43
+      }
+    },
+    {
+      "id": "travel_002",
+      "task_type": "travel_planner",
+      "task_description": "Plan a weekend museum tour in NYC with $150 budget. Must include at least one art museum and one science museum.",
+      "problem_data": {
+        "destinations": [
+          {"id": "M1", "name": "MoMA", "cost": 30, "duration_minutes": 180, "type": "art"},
+          {"id": "M2", "name": "Natural History Museum", "cost": 28, "duration_minutes": 240, "type": "science"},
+          {"id": "M3", "name": "Met Museum", "cost": 30, "duration_minutes": 240, "type": "art"},
+          {"id": "M4", "name": "Guggenheim", "cost": 25, "duration_minutes": 120, "type": "art"},
+          {"id": "M5", "name": "Intrepid Museum", "cost": 36, "duration_minutes": 180, "type": "science"},
+          {"id": "L1", "name": "Lunch at Museum Cafe", "cost": 25, "duration_minutes": 60, "type": "food"}
+        ],
+        "budget": 150,
+        "time_constraints": {
+          "day_start": "10:00",
+          "day_end": "18:00"
+        },
+        "dependencies": [],
+        "constraints": {
+          "must_include_art": true,
+          "must_include_science": true
+        }
+      },
+      "hard_constraints": [
+        "Total cost must not exceed $150",
+        "All activities between 10:00 and 18:00",
+        "Must include at least one art museum",
+        "Must include at least one science museum",
+        "No overlapping activities"
+      ],
+      "soft_constraints": ["Maximize number of museums visited"],
+      "ground_truth": {
+        "sample_valid_itinerary": [
+          {"activity": "MoMA", "start_time": "10:00", "end_time": "13:00", "cost": 30},
+          {"activity": "Lunch at Museum Cafe", "start_time": "13:00", "end_time": "14:00", "cost": 25},
+          {"activity": "Natural History Museum", "start_time": "14:00", "end_time": "18:00", "cost": 28}
+        ],
+        "total_cost": 83
+      }
+    },
+    {
+      "id": "travel_003",
+      "task_type": "travel_planner",
+      "task_description": "IMPOSSIBLE: Plan a trip with $50 budget that requires activities totaling $100 minimum.",
+      "problem_data": {
+        "destinations": [
+          {"id": "E1", "name": "Theme Park", "cost": 75, "duration_minutes": 360, "required": true},
+          {"id": "E2", "name": "Water Park", "cost": 50, "duration_minutes": 240, "required": true}
+        ],
+        "budget": 50,
+        "time_constraints": {
+          "day_start": "09:00",
+          "day_end": "20:00"
+        },
+        "dependencies": [],
+        "constraints": {
+          "all_required": true
+        }
+      },
+      "hard_constraints": [
+        "Total cost must not exceed $50",
+        "Must visit all required destinations"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "is_impossible": true,
+        "explanation": "Required activities cost $125, but budget is only $50"
+      }
+    },
+    {
+      "id": "travel_004",
+      "task_type": "travel_planner",
+      "task_description": "Plan a food tour in Tokyo with ¥15,000 budget. Must try ramen before sushi (traditional order) and include at least one dessert.",
+      "problem_data": {
+        "destinations": [
+          {"id": "F1", "name": "Ramen Shop", "cost": 1200, "duration_minutes": 45},
+          {"id": "F2", "name": "Sushi Restaurant", "cost": 5000, "duration_minutes": 90},
+          {"id": "F3", "name": "Izakaya", "cost": 3000, "duration_minutes": 120},
+          {"id": "F4", "name": "Matcha Cafe", "cost": 800, "duration_minutes": 45, "type": "dessert"},
+          {"id": "F5", "name": "Taiyaki Stand", "cost": 300, "duration_minutes": 15, "type": "dessert"},
+          {"id": "F6", "name": "Tempura Restaurant", "cost": 2500, "duration_minutes": 60}
+        ],
+        "budget": 15000,
+        "time_constraints": {
+          "day_start": "11:00",
+          "day_end": "21:00"
+        },
+        "dependencies": [
+          {"before": "Ramen Shop", "after": "Sushi Restaurant", "reason": "Cultural dining order"}
+        ]
+      },
+      "hard_constraints": [
+        "Total cost must not exceed ¥15,000",
+        "Ramen must be eaten before Sushi",
+        "Must include at least one dessert",
+        "All activities between 11:00 and 21:00"
+      ],
+      "soft_constraints": ["Try diverse food types"],
+      "ground_truth": {
+        "sample_valid_itinerary": [
+          {"activity": "Ramen Shop", "start_time": "11:30", "end_time": "12:15", "cost": 1200},
+          {"activity": "Matcha Cafe", "start_time": "12:30", "end_time": "13:15", "cost": 800},
+          {"activity": "Tempura Restaurant", "start_time": "14:00", "end_time": "15:00", "cost": 2500},
+          {"activity": "Sushi Restaurant", "start_time": "18:00", "end_time": "19:30", "cost": 5000},
+          {"activity": "Izakaya", "start_time": "19:45", "end_time": "21:00", "cost": 3000}
+        ],
+        "total_cost": 12500
+      }
+    },
+    {
+      "id": "travel_005",
+      "task_type": "travel_planner",
+      "task_description": "Plan a hiking trip with strict timing. Reach the summit by noon (for best views) and return before dark.",
+      "problem_data": {
+        "destinations": [
+          {"id": "H1", "name": "Trailhead Start", "cost": 10, "duration_minutes": 30, "type": "parking"},
+          {"id": "H2", "name": "Lower Falls Viewpoint", "cost": 0, "duration_minutes": 45, "type": "scenic"},
+          {"id": "H3", "name": "Summit", "cost": 0, "duration_minutes": 60, "type": "destination", "must_reach_by": "12:00"},
+          {"id": "H4", "name": "Ridge Trail Return", "cost": 0, "duration_minutes": 120, "type": "trail"},
+          {"id": "H5", "name": "Visitor Center", "cost": 5, "duration_minutes": 30, "type": "amenity"}
+        ],
+        "budget": 50,
+        "time_constraints": {
+          "day_start": "07:00",
+          "day_end": "17:00"
+        },
+        "dependencies": [
+          {"before": "Trailhead Start", "after": "Lower Falls Viewpoint"},
+          {"before": "Lower Falls Viewpoint", "after": "Summit"},
+          {"before": "Summit", "after": "Ridge Trail Return"},
+          {"before": "Ridge Trail Return", "after": "Visitor Center"}
+        ],
+        "travel_times": {
+          "trailhead_to_falls": 60,
+          "falls_to_summit": 90,
+          "summit_to_ridge": 30,
+          "ridge_to_visitor": 30
+        }
+      },
+      "hard_constraints": [
+        "Must reach Summit by 12:00",
+        "Must complete all activities by 17:00",
+        "Follow trail order (dependencies)",
+        "Budget not exceeded"
+      ],
+      "soft_constraints": ["Allow time for photos at scenic points"],
+      "ground_truth": {
+        "sample_valid_itinerary": [
+          {"activity": "Trailhead Start", "start_time": "07:00", "end_time": "07:30", "cost": 10},
+          {"activity": "Lower Falls Viewpoint", "start_time": "08:30", "end_time": "09:15", "cost": 0},
+          {"activity": "Summit", "start_time": "10:45", "end_time": "11:45", "cost": 0},
+          {"activity": "Ridge Trail Return", "start_time": "12:15", "end_time": "14:15", "cost": 0},
+          {"activity": "Visitor Center", "start_time": "14:45", "end_time": "15:15", "cost": 5}
+        ],
+        "total_cost": 15
+      }
+    },
+    {
+      "id": "travel_006",
+      "task_type": "travel_planner",
+      "task_description": "Plan a business trip itinerary: Morning meeting, client lunch, afternoon presentation, dinner with partners.",
+      "problem_data": {
+        "destinations": [
+          {"id": "B1", "name": "Morning Strategy Meeting", "cost": 0, "duration_minutes": 120, "type": "meeting", "fixed_time": "09:00"},
+          {"id": "B2", "name": "Client Lunch", "cost": 150, "duration_minutes": 90, "type": "meal"},
+          {"id": "B3", "name": "Product Presentation", "cost": 0, "duration_minutes": 180, "type": "presentation"},
+          {"id": "B4", "name": "Partner Dinner", "cost": 200, "duration_minutes": 120, "type": "meal", "earliest_start": "18:00"},
+          {"id": "B5", "name": "Travel to Client Office", "cost": 30, "duration_minutes": 45, "type": "transport"}
+        ],
+        "budget": 500,
+        "time_constraints": {
+          "day_start": "09:00",
+          "day_end": "22:00"
+        },
+        "dependencies": [
+          {"before": "Morning Strategy Meeting", "after": "Travel to Client Office"},
+          {"before": "Travel to Client Office", "after": "Client Lunch"},
+          {"before": "Client Lunch", "after": "Product Presentation"},
+          {"before": "Product Presentation", "after": "Partner Dinner"}
+        ]
+      },
+      "hard_constraints": [
+        "Morning meeting starts at exactly 09:00",
+        "Partner dinner cannot start before 18:00",
+        "Follow sequence of events",
+        "Stay within budget"
+      ],
+      "soft_constraints": ["Allow buffer time between activities"],
+      "ground_truth": {
+        "sample_valid_itinerary": [
+          {"activity": "Morning Strategy Meeting", "start_time": "09:00", "end_time": "11:00", "cost": 0},
+          {"activity": "Travel to Client Office", "start_time": "11:00", "end_time": "11:45", "cost": 30},
+          {"activity": "Client Lunch", "start_time": "12:00", "end_time": "13:30", "cost": 150},
+          {"activity": "Product Presentation", "start_time": "14:00", "end_time": "17:00", "cost": 0},
+          {"activity": "Partner Dinner", "start_time": "18:00", "end_time": "20:00", "cost": 200}
+        ],
+        "total_cost": 380
+      }
+    },
+    {
+      "id": "travel_007",
+      "task_type": "travel_planner",
+      "task_description": "Plan a family vacation day at Disneyland with 4 people. Budget is $800. FastPass for popular rides recommended.",
+      "problem_data": {
+        "destinations": [
+          {"id": "D1", "name": "Space Mountain", "cost": 0, "duration_minutes": 45, "popularity": "high"},
+          {"id": "D2", "name": "Pirates of the Caribbean", "cost": 0, "duration_minutes": 30, "popularity": "high"},
+          {"id": "D3", "name": "Haunted Mansion", "cost": 0, "duration_minutes": 25, "popularity": "medium"},
+          {"id": "D4", "name": "It's a Small World", "cost": 0, "duration_minutes": 20, "popularity": "low"},
+          {"id": "D5", "name": "Lunch at Blue Bayou", "cost": 200, "duration_minutes": 90, "type": "meal", "capacity_limit": true},
+          {"id": "D6", "name": "FastPass Bundle", "cost": 100, "duration_minutes": 0, "type": "upgrade"},
+          {"id": "D7", "name": "Park Admission x4", "cost": 560, "duration_minutes": 0, "type": "entry", "required": true}
+        ],
+        "budget": 800,
+        "time_constraints": {
+          "day_start": "09:00",
+          "day_end": "21:00"
+        },
+        "dependencies": [],
+        "wait_times": {
+          "high_popularity": 60,
+          "medium_popularity": 30,
+          "low_popularity": 10,
+          "with_fastpass": 10
+        }
+      },
+      "hard_constraints": [
+        "Park admission required for all 4 people ($560)",
+        "Total budget $800",
+        "Activities between park hours (09:00-21:00)",
+        "No overlapping activities"
+      ],
+      "soft_constraints": ["Maximize rides visited", "Minimize wait times"],
+      "ground_truth": {
+        "sample_valid_itinerary": [
+          {"activity": "Park Admission x4", "start_time": "09:00", "end_time": "09:00", "cost": 560},
+          {"activity": "It's a Small World", "start_time": "09:30", "end_time": "10:00", "cost": 0},
+          {"activity": "Pirates of the Caribbean", "start_time": "10:30", "end_time": "11:45", "cost": 0},
+          {"activity": "Lunch at Blue Bayou", "start_time": "12:00", "end_time": "13:30", "cost": 200},
+          {"activity": "Haunted Mansion", "start_time": "14:00", "end_time": "14:55", "cost": 0},
+          {"activity": "Space Mountain", "start_time": "15:30", "end_time": "17:15", "cost": 0}
+        ],
+        "total_cost": 760,
+        "note": "Budget allows for $40 extra (snacks, souvenirs)"
+      }
+    },
+    {
+      "id": "travel_008",
+      "task_type": "travel_planner",
+      "task_description": "Plan a wine country tour. Must visit 3 wineries, have lunch, and return by 5 PM for evening flight.",
+      "problem_data": {
+        "destinations": [
+          {"id": "W1", "name": "Chateau Montelena", "cost": 40, "duration_minutes": 75, "type": "winery"},
+          {"id": "W2", "name": "Opus One", "cost": 100, "duration_minutes": 90, "type": "winery"},
+          {"id": "W3", "name": "Stag's Leap", "cost": 50, "duration_minutes": 60, "type": "winery"},
+          {"id": "W4", "name": "Robert Mondavi", "cost": 35, "duration_minutes": 60, "type": "winery"},
+          {"id": "L1", "name": "Bouchon Bistro", "cost": 75, "duration_minutes": 90, "type": "lunch"},
+          {"id": "L2", "name": "Gott's Roadside", "cost": 30, "duration_minutes": 45, "type": "lunch"}
+        ],
+        "budget": 300,
+        "time_constraints": {
+          "day_start": "10:00",
+          "day_end": "17:00"
+        },
+        "dependencies": [],
+        "travel_times": {
+          "between_wineries": 20
+        }
+      },
+      "hard_constraints": [
+        "Must visit exactly 3 wineries",
+        "Must have lunch",
+        "Must finish by 17:00",
+        "Total cost under $300"
+      ],
+      "soft_constraints": ["Visit diverse wine styles"],
+      "ground_truth": {
+        "sample_valid_itinerary": [
+          {"activity": "Robert Mondavi", "start_time": "10:00", "end_time": "11:00", "cost": 35},
+          {"activity": "Stag's Leap", "start_time": "11:20", "end_time": "12:20", "cost": 50},
+          {"activity": "Gott's Roadside", "start_time": "12:40", "end_time": "13:25", "cost": 30},
+          {"activity": "Chateau Montelena", "start_time": "13:45", "end_time": "15:00", "cost": 40}
+        ],
+        "total_cost": 155
+      }
+    },
+    {
+      "id": "travel_009",
+      "task_type": "travel_planner",
+      "task_description": "Complex: Multi-city Europe trip planning. Paris → Amsterdam → Berlin in 3 days with €500 budget for activities.",
+      "problem_data": {
+        "destinations": [
+          {"id": "P1", "name": "Eiffel Tower", "cost": 26, "duration_minutes": 120, "city": "Paris", "day": 1},
+          {"id": "P2", "name": "Louvre Museum", "cost": 17, "duration_minutes": 240, "city": "Paris", "day": 1},
+          {"id": "P3", "name": "Paris Dinner", "cost": 50, "duration_minutes": 90, "city": "Paris", "day": 1, "type": "meal"},
+          {"id": "A1", "name": "Anne Frank House", "cost": 16, "duration_minutes": 90, "city": "Amsterdam", "day": 2, "must_book_ahead": true},
+          {"id": "A2", "name": "Van Gogh Museum", "cost": 22, "duration_minutes": 150, "city": "Amsterdam", "day": 2},
+          {"id": "A3", "name": "Canal Cruise", "cost": 18, "duration_minutes": 75, "city": "Amsterdam", "day": 2},
+          {"id": "B1", "name": "Brandenburg Gate", "cost": 0, "duration_minutes": 45, "city": "Berlin", "day": 3},
+          {"id": "B2", "name": "Berlin Wall Memorial", "cost": 0, "duration_minutes": 90, "city": "Berlin", "day": 3},
+          {"id": "B3", "name": "Museum Island", "cost": 22, "duration_minutes": 240, "city": "Berlin", "day": 3}
+        ],
+        "budget": 500,
+        "time_constraints": {
+          "day_start": "09:00",
+          "day_end": "21:00"
+        },
+        "dependencies": [
+          {"before": "Eiffel Tower", "after": "Paris Dinner", "reason": "Sightseeing before dinner"}
+        ],
+        "inter_city_travel": {
+          "Paris_to_Amsterdam": {"cost": 80, "duration_minutes": 180},
+          "Amsterdam_to_Berlin": {"cost": 60, "duration_minutes": 240}
+        }
+      },
+      "hard_constraints": [
+        "Stay within €500 activity budget (excludes inter-city travel)",
+        "Each day's activities must be in correct city",
+        "All activities within daily time window",
+        "No overlapping activities within a day"
+      ],
+      "soft_constraints": ["Balance culture, history, and leisure"],
+      "ground_truth": {
+        "sample_valid_itinerary": {
+          "day_1_paris": [
+            {"activity": "Louvre Museum", "start_time": "09:30", "end_time": "13:30", "cost": 17},
+            {"activity": "Eiffel Tower", "start_time": "15:00", "end_time": "17:00", "cost": 26},
+            {"activity": "Paris Dinner", "start_time": "19:00", "end_time": "20:30", "cost": 50}
+          ],
+          "day_2_amsterdam": [
+            {"activity": "Anne Frank House", "start_time": "09:30", "end_time": "11:00", "cost": 16},
+            {"activity": "Canal Cruise", "start_time": "11:30", "end_time": "12:45", "cost": 18},
+            {"activity": "Van Gogh Museum", "start_time": "14:00", "end_time": "16:30", "cost": 22}
+          ],
+          "day_3_berlin": [
+            {"activity": "Brandenburg Gate", "start_time": "09:00", "end_time": "09:45", "cost": 0},
+            {"activity": "Berlin Wall Memorial", "start_time": "10:00", "end_time": "11:30", "cost": 0},
+            {"activity": "Museum Island", "start_time": "13:00", "end_time": "17:00", "cost": 22}
+          ]
+        },
+        "total_cost": 171
+      }
+    },
+    {
+      "id": "travel_010",
+      "task_type": "travel_planner",
+      "task_description": "Extreme constraints: Plan adventure activities with strict safety intervals. No bungee jumping within 2 hours of eating.",
+      "problem_data": {
+        "destinations": [
+          {"id": "X1", "name": "Bungee Jumping", "cost": 150, "duration_minutes": 30, "type": "extreme", "safety_buffer_after_food": 120},
+          {"id": "X2", "name": "Skydiving", "cost": 200, "duration_minutes": 180, "type": "extreme", "safety_buffer_after_food": 120},
+          {"id": "X3", "name": "White Water Rafting", "cost": 85, "duration_minutes": 240, "type": "adventure"},
+          {"id": "X4", "name": "Zip Line", "cost": 60, "duration_minutes": 60, "type": "adventure"},
+          {"id": "M1", "name": "Breakfast Buffet", "cost": 25, "duration_minutes": 60, "type": "meal"},
+          {"id": "M2", "name": "Lunch", "cost": 30, "duration_minutes": 45, "type": "meal"}
+        ],
+        "budget": 400,
+        "time_constraints": {
+          "day_start": "07:00",
+          "day_end": "18:00"
+        },
+        "dependencies": [],
+        "safety_rules": {
+          "no_extreme_within_hours_of_meal": 2
+        }
+      },
+      "hard_constraints": [
+        "No bungee/skydiving within 2 hours of eating",
+        "Budget not exceeded",
+        "All activities within time window",
+        "Must include at least one meal"
+      ],
+      "soft_constraints": ["Maximize thrills"],
+      "ground_truth": {
+        "sample_valid_itinerary": [
+          {"activity": "Bungee Jumping", "start_time": "07:30", "end_time": "08:00", "cost": 150},
+          {"activity": "Breakfast Buffet", "start_time": "10:00", "end_time": "11:00", "cost": 25},
+          {"activity": "Zip Line", "start_time": "11:30", "end_time": "12:30", "cost": 60},
+          {"activity": "Lunch", "start_time": "13:00", "end_time": "13:45", "cost": 30},
+          {"activity": "White Water Rafting", "start_time": "14:00", "end_time": "18:00", "cost": 85}
+        ],
+        "total_cost": 350,
+        "note": "Bungee done before breakfast, satisfying 2-hour rule"
+      }
+    }
+  ]
+}

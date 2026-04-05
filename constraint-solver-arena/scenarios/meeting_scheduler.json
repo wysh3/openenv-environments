@@ -1,0 +1,534 @@
+{
+  "scenarios": [
+    {
+      "id": "meeting_001",
+      "task_type": "meeting_scheduler",
+      "task_description": "Schedule a 60-minute meeting between Alice, Bob, and Carol. Find a time slot that works for everyone.",
+      "problem_data": {
+        "participants": [
+          {
+            "name": "Alice",
+            "availability": {
+              "Monday": [{"start": "09:00", "end": "12:00"}, {"start": "14:00", "end": "17:00"}],
+              "Tuesday": [{"start": "10:00", "end": "15:00"}],
+              "Wednesday": [{"start": "09:00", "end": "12:00"}]
+            }
+          },
+          {
+            "name": "Bob",
+            "availability": {
+              "Monday": [{"start": "10:00", "end": "13:00"}],
+              "Tuesday": [{"start": "09:00", "end": "12:00"}, {"start": "13:00", "end": "16:00"}],
+              "Wednesday": [{"start": "10:00", "end": "14:00"}]
+            }
+          },
+          {
+            "name": "Carol",
+            "availability": {
+              "Monday": [{"start": "09:00", "end": "11:00"}, {"start": "14:00", "end": "18:00"}],
+              "Tuesday": [{"start": "11:00", "end": "16:00"}],
+              "Wednesday": [{"start": "09:00", "end": "13:00"}]
+            }
+          }
+        ],
+        "duration_minutes": 60
+      },
+      "hard_constraints": [
+        "All participants must be available during the meeting",
+        "Meeting must be exactly 60 minutes",
+        "Meeting must be on Monday, Tuesday, or Wednesday"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "valid_slots": [
+          {"day": "Monday", "start": "10:00", "end": "11:00"},
+          {"day": "Tuesday", "start": "11:00", "end": "12:00"},
+          {"day": "Tuesday", "start": "13:00", "end": "14:00"},
+          {"day": "Tuesday", "start": "14:00", "end": "15:00"},
+          {"day": "Wednesday", "start": "10:00", "end": "11:00"},
+          {"day": "Wednesday", "start": "11:00", "end": "12:00"}
+        ]
+      }
+    },
+    {
+      "id": "meeting_002",
+      "task_type": "meeting_scheduler",
+      "task_description": "Schedule a 90-minute team meeting with David, Emma, and Frank. The meeting requires Conference Room A which has limited availability.",
+      "problem_data": {
+        "participants": [
+          {
+            "name": "David",
+            "availability": {
+              "Monday": [{"start": "08:00", "end": "12:00"}],
+              "Tuesday": [{"start": "13:00", "end": "18:00"}],
+              "Thursday": [{"start": "09:00", "end": "15:00"}]
+            }
+          },
+          {
+            "name": "Emma",
+            "availability": {
+              "Monday": [{"start": "09:00", "end": "11:00"}, {"start": "13:00", "end": "16:00"}],
+              "Tuesday": [{"start": "14:00", "end": "17:00"}],
+              "Thursday": [{"start": "10:00", "end": "14:00"}]
+            }
+          },
+          {
+            "name": "Frank",
+            "availability": {
+              "Monday": [{"start": "08:00", "end": "10:30"}],
+              "Tuesday": [{"start": "13:00", "end": "16:00"}],
+              "Thursday": [{"start": "09:30", "end": "13:00"}]
+            }
+          }
+        ],
+        "duration_minutes": 90,
+        "room_constraints": {
+          "Conference Room A": {
+            "Monday": [{"start": "08:00", "end": "10:30"}],
+            "Tuesday": [{"start": "14:00", "end": "17:00"}],
+            "Thursday": [{"start": "10:00", "end": "13:00"}]
+          }
+        }
+      },
+      "hard_constraints": [
+        "All participants must be available during the meeting",
+        "Meeting must be exactly 90 minutes",
+        "Conference Room A must be available for the entire meeting duration"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "valid_slots": [
+          {"day": "Tuesday", "start": "14:00", "end": "15:30", "room": "Conference Room A"},
+          {"day": "Thursday", "start": "10:00", "end": "11:30", "room": "Conference Room A"}
+        ]
+      }
+    },
+    {
+      "id": "meeting_003",
+      "task_type": "meeting_scheduler",
+      "task_description": "Schedule a 30-minute standup meeting for the engineering team: Grace, Henry, Ivan, and Julia. This is a daily meeting, find a time that works every weekday.",
+      "problem_data": {
+        "participants": [
+          {
+            "name": "Grace",
+            "availability": {
+              "Monday": [{"start": "09:00", "end": "10:00"}, {"start": "15:00", "end": "17:00"}],
+              "Tuesday": [{"start": "09:00", "end": "10:00"}, {"start": "15:00", "end": "17:00"}],
+              "Wednesday": [{"start": "09:00", "end": "10:00"}, {"start": "15:00", "end": "17:00"}],
+              "Thursday": [{"start": "09:00", "end": "10:00"}, {"start": "15:00", "end": "17:00"}],
+              "Friday": [{"start": "09:00", "end": "10:00"}, {"start": "15:00", "end": "17:00"}]
+            }
+          },
+          {
+            "name": "Henry",
+            "availability": {
+              "Monday": [{"start": "09:00", "end": "11:00"}],
+              "Tuesday": [{"start": "09:00", "end": "11:00"}],
+              "Wednesday": [{"start": "09:00", "end": "11:00"}],
+              "Thursday": [{"start": "09:00", "end": "11:00"}],
+              "Friday": [{"start": "09:00", "end": "11:00"}]
+            }
+          },
+          {
+            "name": "Ivan",
+            "availability": {
+              "Monday": [{"start": "09:30", "end": "12:00"}],
+              "Tuesday": [{"start": "09:30", "end": "12:00"}],
+              "Wednesday": [{"start": "09:30", "end": "12:00"}],
+              "Thursday": [{"start": "09:30", "end": "12:00"}],
+              "Friday": [{"start": "09:30", "end": "12:00"}]
+            }
+          },
+          {
+            "name": "Julia",
+            "availability": {
+              "Monday": [{"start": "09:00", "end": "10:30"}],
+              "Tuesday": [{"start": "09:00", "end": "10:30"}],
+              "Wednesday": [{"start": "09:00", "end": "10:30"}],
+              "Thursday": [{"start": "09:00", "end": "10:30"}],
+              "Friday": [{"start": "09:00", "end": "10:30"}]
+            }
+          }
+        ],
+        "duration_minutes": 30
+      },
+      "hard_constraints": [
+        "All participants must be available during the meeting",
+        "Meeting must be exactly 30 minutes",
+        "Time slot must work on any weekday"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "valid_slots": [
+          {"day": "Monday", "start": "09:30", "end": "10:00"},
+          {"day": "Tuesday", "start": "09:30", "end": "10:00"},
+          {"day": "Wednesday", "start": "09:30", "end": "10:00"},
+          {"day": "Thursday", "start": "09:30", "end": "10:00"},
+          {"day": "Friday", "start": "09:30", "end": "10:00"}
+        ]
+      }
+    },
+    {
+      "id": "meeting_004",
+      "task_type": "meeting_scheduler",
+      "task_description": "IMPOSSIBLE SCENARIO: Schedule a 2-hour meeting between Kate, Leo, and Mike. Their schedules have no overlap.",
+      "problem_data": {
+        "participants": [
+          {
+            "name": "Kate",
+            "availability": {
+              "Monday": [{"start": "08:00", "end": "10:00"}],
+              "Tuesday": [{"start": "08:00", "end": "10:00"}]
+            }
+          },
+          {
+            "name": "Leo",
+            "availability": {
+              "Monday": [{"start": "14:00", "end": "16:00"}],
+              "Tuesday": [{"start": "14:00", "end": "16:00"}]
+            }
+          },
+          {
+            "name": "Mike",
+            "availability": {
+              "Monday": [{"start": "10:30", "end": "12:30"}],
+              "Tuesday": [{"start": "10:30", "end": "12:30"}]
+            }
+          }
+        ],
+        "duration_minutes": 120
+      },
+      "hard_constraints": [
+        "All participants must be available during the meeting",
+        "Meeting must be exactly 120 minutes"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "valid_slots": [],
+        "is_impossible": true,
+        "explanation": "No overlapping availability exists for all three participants"
+      }
+    },
+    {
+      "id": "meeting_005",
+      "task_type": "meeting_scheduler",
+      "task_description": "Schedule a 45-minute one-on-one meeting between Nancy (manager) and Oscar (report). Nancy has back-to-back meetings most of the week.",
+      "problem_data": {
+        "participants": [
+          {
+            "name": "Nancy",
+            "availability": {
+              "Monday": [{"start": "11:00", "end": "12:00"}],
+              "Tuesday": [],
+              "Wednesday": [{"start": "16:00", "end": "17:00"}],
+              "Thursday": [{"start": "09:00", "end": "10:00"}, {"start": "15:00", "end": "16:30"}],
+              "Friday": [{"start": "14:00", "end": "16:00"}]
+            }
+          },
+          {
+            "name": "Oscar",
+            "availability": {
+              "Monday": [{"start": "09:00", "end": "12:00"}, {"start": "14:00", "end": "17:00"}],
+              "Tuesday": [{"start": "09:00", "end": "17:00"}],
+              "Wednesday": [{"start": "13:00", "end": "17:00"}],
+              "Thursday": [{"start": "09:00", "end": "11:00"}, {"start": "14:00", "end": "17:00"}],
+              "Friday": [{"start": "09:00", "end": "15:00"}]
+            }
+          }
+        ],
+        "duration_minutes": 45
+      },
+      "hard_constraints": [
+        "Both participants must be available during the meeting",
+        "Meeting must be at least 45 minutes"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "valid_slots": [
+          {"day": "Monday", "start": "11:00", "end": "11:45"},
+          {"day": "Thursday", "start": "09:00", "end": "09:45"},
+          {"day": "Thursday", "start": "15:00", "end": "15:45"},
+          {"day": "Thursday", "start": "15:15", "end": "16:00"},
+          {"day": "Friday", "start": "14:00", "end": "14:45"}
+        ]
+      }
+    },
+    {
+      "id": "meeting_006",
+      "task_type": "meeting_scheduler",
+      "task_description": "Schedule a 2-hour board meeting with 5 executives: Peter, Quinn, Rachel, Steve, and Tina. All must attend and the meeting must use the Executive Boardroom.",
+      "problem_data": {
+        "participants": [
+          {
+            "name": "Peter",
+            "availability": {
+              "Monday": [{"start": "10:00", "end": "14:00"}],
+              "Wednesday": [{"start": "09:00", "end": "13:00"}],
+              "Friday": [{"start": "10:00", "end": "15:00"}]
+            }
+          },
+          {
+            "name": "Quinn",
+            "availability": {
+              "Monday": [{"start": "09:00", "end": "12:00"}],
+              "Wednesday": [{"start": "10:00", "end": "14:00"}],
+              "Friday": [{"start": "11:00", "end": "16:00"}]
+            }
+          },
+          {
+            "name": "Rachel",
+            "availability": {
+              "Monday": [{"start": "10:00", "end": "13:00"}],
+              "Wednesday": [{"start": "09:00", "end": "12:00"}],
+              "Friday": [{"start": "10:00", "end": "14:00"}]
+            }
+          },
+          {
+            "name": "Steve",
+            "availability": {
+              "Monday": [{"start": "08:00", "end": "14:00"}],
+              "Wednesday": [{"start": "10:00", "end": "13:00"}],
+              "Friday": [{"start": "09:00", "end": "13:00"}]
+            }
+          },
+          {
+            "name": "Tina",
+            "availability": {
+              "Monday": [{"start": "10:00", "end": "12:30"}],
+              "Wednesday": [{"start": "10:00", "end": "12:00"}],
+              "Friday": [{"start": "10:00", "end": "13:00"}]
+            }
+          }
+        ],
+        "duration_minutes": 120,
+        "room_constraints": {
+          "Executive Boardroom": {
+            "Monday": [{"start": "10:00", "end": "14:00"}],
+            "Wednesday": [{"start": "09:00", "end": "13:00"}],
+            "Friday": [{"start": "10:00", "end": "14:00"}]
+          }
+        }
+      },
+      "hard_constraints": [
+        "All 5 executives must be available during the meeting",
+        "Meeting must be exactly 120 minutes (2 hours)",
+        "Executive Boardroom must be available for the entire meeting"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "valid_slots": [
+          {"day": "Monday", "start": "10:00", "end": "12:00", "room": "Executive Boardroom"},
+          {"day": "Friday", "start": "11:00", "end": "13:00", "room": "Executive Boardroom"}
+        ]
+      }
+    },
+    {
+      "id": "meeting_007",
+      "task_type": "meeting_scheduler",
+      "task_description": "Schedule a quick 15-minute sync between Uma and Victor. Both have very flexible schedules.",
+      "problem_data": {
+        "participants": [
+          {
+            "name": "Uma",
+            "availability": {
+              "Monday": [{"start": "09:00", "end": "17:00"}],
+              "Tuesday": [{"start": "09:00", "end": "17:00"}],
+              "Wednesday": [{"start": "09:00", "end": "17:00"}],
+              "Thursday": [{"start": "09:00", "end": "17:00"}],
+              "Friday": [{"start": "09:00", "end": "17:00"}]
+            }
+          },
+          {
+            "name": "Victor",
+            "availability": {
+              "Monday": [{"start": "10:00", "end": "16:00"}],
+              "Tuesday": [{"start": "10:00", "end": "16:00"}],
+              "Wednesday": [{"start": "10:00", "end": "16:00"}],
+              "Thursday": [{"start": "10:00", "end": "16:00"}],
+              "Friday": [{"start": "10:00", "end": "16:00"}]
+            }
+          }
+        ],
+        "duration_minutes": 15
+      },
+      "hard_constraints": [
+        "Both participants must be available",
+        "Meeting must be at least 15 minutes"
+      ],
+      "soft_constraints": ["Earlier in the week preferred", "Morning preferred"],
+      "ground_truth": {
+        "valid_slots": "Many valid slots exist from 10:00-16:00 on any weekday"
+      }
+    },
+    {
+      "id": "meeting_008",
+      "task_type": "meeting_scheduler",
+      "task_description": "Schedule a 3-hour workshop with Wendy, Xavier, Yara, and Zack. This is an all-hands training session that requires a large conference room.",
+      "problem_data": {
+        "participants": [
+          {
+            "name": "Wendy",
+            "availability": {
+              "Tuesday": [{"start": "09:00", "end": "13:00"}],
+              "Thursday": [{"start": "09:00", "end": "14:00"}]
+            }
+          },
+          {
+            "name": "Xavier",
+            "availability": {
+              "Tuesday": [{"start": "08:00", "end": "12:00"}],
+              "Thursday": [{"start": "10:00", "end": "15:00"}]
+            }
+          },
+          {
+            "name": "Yara",
+            "availability": {
+              "Tuesday": [{"start": "09:00", "end": "14:00"}],
+              "Thursday": [{"start": "09:00", "end": "13:00"}]
+            }
+          },
+          {
+            "name": "Zack",
+            "availability": {
+              "Tuesday": [{"start": "09:00", "end": "12:30"}],
+              "Thursday": [{"start": "10:00", "end": "14:00"}]
+            }
+          }
+        ],
+        "duration_minutes": 180,
+        "room_constraints": {
+          "Training Room": {
+            "Tuesday": [{"start": "08:00", "end": "14:00"}],
+            "Thursday": [{"start": "09:00", "end": "15:00"}]
+          }
+        }
+      },
+      "hard_constraints": [
+        "All participants must be available for the full 3 hours",
+        "Training Room must be available",
+        "Meeting must be exactly 180 minutes"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "valid_slots": [
+          {"day": "Tuesday", "start": "09:00", "end": "12:00", "room": "Training Room"},
+          {"day": "Thursday", "start": "10:00", "end": "13:00", "room": "Training Room"}
+        ]
+      }
+    },
+    {
+      "id": "meeting_009",
+      "task_type": "meeting_scheduler",
+      "task_description": "Schedule a cross-timezone meeting between Amy (EST), Brian (PST), and Chen (CST-China). Find a time that works for all three, considering that Chen prefers not to meet after 9 PM local time.",
+      "problem_data": {
+        "participants": [
+          {
+            "name": "Amy (EST)",
+            "availability": {
+              "Monday": [{"start": "08:00", "end": "18:00"}],
+              "Tuesday": [{"start": "08:00", "end": "18:00"}],
+              "Wednesday": [{"start": "08:00", "end": "18:00"}]
+            },
+            "timezone": "EST"
+          },
+          {
+            "name": "Brian (PST)",
+            "availability": {
+              "Monday": [{"start": "06:00", "end": "16:00"}],
+              "Tuesday": [{"start": "06:00", "end": "16:00"}],
+              "Wednesday": [{"start": "06:00", "end": "16:00"}]
+            },
+            "timezone": "PST"
+          },
+          {
+            "name": "Chen (CST-China)",
+            "availability": {
+              "Monday": [{"start": "20:00", "end": "23:00"}],
+              "Tuesday": [{"start": "20:00", "end": "23:00"}],
+              "Wednesday": [{"start": "20:00", "end": "23:00"}]
+            },
+            "timezone": "CST-China",
+            "note": "Availability shown in EST equivalent. Chen prefers not to meet after 21:00 his local time, which is 08:00 EST."
+          }
+        ],
+        "duration_minutes": 60,
+        "note": "All times shown in EST. PST is EST-3, CST-China is EST+13."
+      },
+      "hard_constraints": [
+        "All participants must be available",
+        "Meeting must be 60 minutes",
+        "Meeting times shown are all in EST"
+      ],
+      "soft_constraints": ["Chen prefers earlier times if possible"],
+      "ground_truth": {
+        "valid_slots": [
+          {"day": "Monday", "start": "20:00", "end": "21:00", "note": "8AM Tuesday Chen local"},
+          {"day": "Tuesday", "start": "20:00", "end": "21:00", "note": "8AM Wednesday Chen local"}
+        ]
+      }
+    },
+    {
+      "id": "meeting_010",
+      "task_type": "meeting_scheduler",
+      "task_description": "Schedule a recurring weekly 1-hour team meeting for Diana, Ethan, Fiona, and George. The meeting should work every week at the same time.",
+      "problem_data": {
+        "participants": [
+          {
+            "name": "Diana",
+            "availability": {
+              "Monday": [{"start": "14:00", "end": "17:00"}],
+              "Tuesday": [{"start": "09:00", "end": "11:00"}, {"start": "14:00", "end": "16:00"}],
+              "Wednesday": [{"start": "14:00", "end": "17:00"}],
+              "Thursday": [{"start": "09:00", "end": "11:00"}, {"start": "14:00", "end": "16:00"}],
+              "Friday": [{"start": "14:00", "end": "17:00"}]
+            }
+          },
+          {
+            "name": "Ethan",
+            "availability": {
+              "Monday": [{"start": "13:00", "end": "16:00"}],
+              "Tuesday": [{"start": "10:00", "end": "12:00"}, {"start": "14:00", "end": "17:00"}],
+              "Wednesday": [{"start": "13:00", "end": "16:00"}],
+              "Thursday": [{"start": "10:00", "end": "12:00"}, {"start": "14:00", "end": "17:00"}],
+              "Friday": [{"start": "13:00", "end": "16:00"}]
+            }
+          },
+          {
+            "name": "Fiona",
+            "availability": {
+              "Monday": [{"start": "14:00", "end": "18:00"}],
+              "Tuesday": [{"start": "09:00", "end": "12:00"}, {"start": "15:00", "end": "17:00"}],
+              "Wednesday": [{"start": "14:00", "end": "18:00"}],
+              "Thursday": [{"start": "09:00", "end": "12:00"}, {"start": "15:00", "end": "17:00"}],
+              "Friday": [{"start": "14:00", "end": "18:00"}]
+            }
+          },
+          {
+            "name": "George",
+            "availability": {
+              "Monday": [{"start": "14:00", "end": "16:00"}],
+              "Tuesday": [{"start": "10:00", "end": "11:00"}, {"start": "15:00", "end": "16:00"}],
+              "Wednesday": [{"start": "14:00", "end": "16:00"}],
+              "Thursday": [{"start": "10:00", "end": "11:00"}, {"start": "15:00", "end": "16:00"}],
+              "Friday": [{"start": "14:00", "end": "16:00"}]
+            }
+          }
+        ],
+        "duration_minutes": 60
+      },
+      "hard_constraints": [
+        "All participants must be available",
+        "Meeting must be 60 minutes",
+        "Same time slot must work weekly"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "valid_slots": [
+          {"day": "Monday", "start": "14:00", "end": "15:00"},
+          {"day": "Wednesday", "start": "14:00", "end": "15:00"},
+          {"day": "Friday", "start": "14:00", "end": "15:00"}
+        ]
+      }
+    }
+  ]
+}

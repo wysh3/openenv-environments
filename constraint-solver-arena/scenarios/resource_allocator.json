@@ -1,0 +1,345 @@
+{
+  "scenarios": [
+    {
+      "id": "resource_001",
+      "task_type": "resource_allocator",
+      "task_description": "Assign 3 software development tasks to 3 developers. Each developer has different skills and available hours.",
+      "problem_data": {
+        "tasks": [
+          {"id": "T1", "name": "Frontend Bug Fix", "skills_required": ["JavaScript", "CSS"], "hours": 4},
+          {"id": "T2", "name": "API Development", "skills_required": ["Python", "REST"], "hours": 6},
+          {"id": "T3", "name": "Database Migration", "skills_required": ["SQL", "Python"], "hours": 3}
+        ],
+        "workers": [
+          {"id": "W1", "name": "Alice", "skills": ["JavaScript", "CSS", "HTML"], "available_hours": 8},
+          {"id": "W2", "name": "Bob", "skills": ["Python", "REST", "SQL"], "available_hours": 8},
+          {"id": "W3", "name": "Carol", "skills": ["Python", "SQL", "Java"], "available_hours": 6}
+        ]
+      },
+      "hard_constraints": [
+        "Each task must be assigned to exactly one worker",
+        "Worker must have all required skills for the task",
+        "Worker cannot be assigned more hours than available"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "valid_assignments": [
+          {"task_id": "T1", "worker_id": "W1"},
+          {"task_id": "T2", "worker_id": "W2"},
+          {"task_id": "T3", "worker_id": "W2"}
+        ],
+        "alternative": [
+          {"task_id": "T1", "worker_id": "W1"},
+          {"task_id": "T2", "worker_id": "W2"},
+          {"task_id": "T3", "worker_id": "W3"}
+        ]
+      }
+    },
+    {
+      "id": "resource_002",
+      "task_type": "resource_allocator",
+      "task_description": "Assign 5 marketing tasks to 4 team members. Some team members share skill sets.",
+      "problem_data": {
+        "tasks": [
+          {"id": "T1", "name": "Social Media Campaign", "skills_required": ["Social Media", "Content Writing"], "hours": 5},
+          {"id": "T2", "name": "Email Newsletter", "skills_required": ["Email Marketing", "Content Writing"], "hours": 3},
+          {"id": "T3", "name": "Analytics Report", "skills_required": ["Analytics", "Excel"], "hours": 4},
+          {"id": "T4", "name": "Press Release", "skills_required": ["PR", "Content Writing"], "hours": 2},
+          {"id": "T5", "name": "Ad Creative Design", "skills_required": ["Graphic Design", "Photoshop"], "hours": 6}
+        ],
+        "workers": [
+          {"id": "W1", "name": "Dana", "skills": ["Social Media", "Content Writing", "Email Marketing"], "available_hours": 8},
+          {"id": "W2", "name": "Eric", "skills": ["Analytics", "Excel", "SQL"], "available_hours": 8},
+          {"id": "W3", "name": "Fay", "skills": ["PR", "Content Writing", "Social Media"], "available_hours": 6},
+          {"id": "W4", "name": "Greg", "skills": ["Graphic Design", "Photoshop", "Illustrator"], "available_hours": 8}
+        ]
+      },
+      "hard_constraints": [
+        "Each task must be assigned to exactly one worker",
+        "Worker must have all required skills for the task",
+        "Worker cannot exceed available hours"
+      ],
+      "soft_constraints": ["Distribute workload evenly if possible"],
+      "ground_truth": {
+        "valid_assignments": [
+          {"task_id": "T1", "worker_id": "W1"},
+          {"task_id": "T2", "worker_id": "W1"},
+          {"task_id": "T3", "worker_id": "W2"},
+          {"task_id": "T4", "worker_id": "W3"},
+          {"task_id": "T5", "worker_id": "W4"}
+        ]
+      }
+    },
+    {
+      "id": "resource_003",
+      "task_type": "resource_allocator",
+      "task_description": "IMPOSSIBLE SCENARIO: Assign 3 tasks requiring specialized skills that no available workers have.",
+      "problem_data": {
+        "tasks": [
+          {"id": "T1", "name": "Machine Learning Model", "skills_required": ["TensorFlow", "Python", "ML"], "hours": 10},
+          {"id": "T2", "name": "iOS App", "skills_required": ["Swift", "iOS", "Xcode"], "hours": 8},
+          {"id": "T3", "name": "Blockchain Smart Contract", "skills_required": ["Solidity", "Ethereum"], "hours": 6}
+        ],
+        "workers": [
+          {"id": "W1", "name": "Henry", "skills": ["JavaScript", "React", "Node.js"], "available_hours": 8},
+          {"id": "W2", "name": "Ivy", "skills": ["Python", "Django", "PostgreSQL"], "available_hours": 8}
+        ]
+      },
+      "hard_constraints": [
+        "Each task must be assigned to a worker with required skills",
+        "All tasks must be completed"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "is_impossible": true,
+        "explanation": "No workers have the required skills for any of the tasks"
+      }
+    },
+    {
+      "id": "resource_004",
+      "task_type": "resource_allocator",
+      "task_description": "Assign 6 construction tasks across 3 workers with overlapping skills but limited hours.",
+      "problem_data": {
+        "tasks": [
+          {"id": "T1", "name": "Electrical Wiring", "skills_required": ["Electrical"], "hours": 5},
+          {"id": "T2", "name": "Plumbing Install", "skills_required": ["Plumbing"], "hours": 4},
+          {"id": "T3", "name": "Drywall Hanging", "skills_required": ["Carpentry"], "hours": 6},
+          {"id": "T4", "name": "Light Fixture Install", "skills_required": ["Electrical"], "hours": 2},
+          {"id": "T5", "name": "Toilet Installation", "skills_required": ["Plumbing"], "hours": 3},
+          {"id": "T6", "name": "Door Framing", "skills_required": ["Carpentry"], "hours": 4}
+        ],
+        "workers": [
+          {"id": "W1", "name": "Jack", "skills": ["Electrical", "Plumbing"], "available_hours": 8},
+          {"id": "W2", "name": "Kim", "skills": ["Plumbing", "Carpentry"], "available_hours": 10},
+          {"id": "W3", "name": "Leo", "skills": ["Carpentry", "Electrical"], "available_hours": 8}
+        ]
+      },
+      "hard_constraints": [
+        "Each task assigned to worker with required skill",
+        "No worker exceeds available hours",
+        "All tasks must be assigned"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "valid_assignments": [
+          {"task_id": "T1", "worker_id": "W1"},
+          {"task_id": "T4", "worker_id": "W1"},
+          {"task_id": "T2", "worker_id": "W2"},
+          {"task_id": "T5", "worker_id": "W2"},
+          {"task_id": "T3", "worker_id": "W3"},
+          {"task_id": "T6", "worker_id": "W3"}
+        ],
+        "note": "W1: 7h, W2: 7h, W3: 10h - but W3 only has 8h, so alternative needed"
+      }
+    },
+    {
+      "id": "resource_005",
+      "task_type": "resource_allocator",
+      "task_description": "Assign hospital shifts to nurses with specific certifications required for different wards.",
+      "problem_data": {
+        "tasks": [
+          {"id": "T1", "name": "ICU Morning Shift", "skills_required": ["RN", "ICU Certified"], "hours": 8},
+          {"id": "T2", "name": "ER Evening Shift", "skills_required": ["RN", "Trauma Certified"], "hours": 8},
+          {"id": "T3", "name": "Pediatrics Day Shift", "skills_required": ["RN", "Pediatrics Certified"], "hours": 8},
+          {"id": "T4", "name": "Surgery Assist", "skills_required": ["RN", "Surgery Certified"], "hours": 6}
+        ],
+        "workers": [
+          {"id": "W1", "name": "Maria", "skills": ["RN", "ICU Certified", "Trauma Certified"], "available_hours": 12},
+          {"id": "W2", "name": "Nina", "skills": ["RN", "Pediatrics Certified", "ICU Certified"], "available_hours": 8},
+          {"id": "W3", "name": "Oscar", "skills": ["RN", "Surgery Certified", "Trauma Certified"], "available_hours": 10}
+        ]
+      },
+      "hard_constraints": [
+        "Nurse must have all required certifications",
+        "No nurse can work more than their available hours",
+        "All shifts must be covered"
+      ],
+      "soft_constraints": ["Avoid assigning same nurse to back-to-back shifts if possible"],
+      "ground_truth": {
+        "valid_assignments": [
+          {"task_id": "T1", "worker_id": "W2"},
+          {"task_id": "T2", "worker_id": "W1"},
+          {"task_id": "T3", "worker_id": "W2"},
+          {"task_id": "T4", "worker_id": "W3"}
+        ],
+        "note": "W2 cannot do both T1 and T3 (16 hours > 8 available). Alternative: W1 does T1, W2 does T3, etc."
+      }
+    },
+    {
+      "id": "resource_006",
+      "task_type": "resource_allocator",
+      "task_description": "Assign 4 delivery routes to 3 drivers based on vehicle type and license requirements.",
+      "problem_data": {
+        "tasks": [
+          {"id": "T1", "name": "Downtown Deliveries", "skills_required": ["Class B License"], "hours": 6},
+          {"id": "T2", "name": "Suburban Route", "skills_required": ["Class C License"], "hours": 5},
+          {"id": "T3", "name": "Long Haul Interstate", "skills_required": ["Class A License", "Hazmat"], "hours": 10},
+          {"id": "T4", "name": "Local Pickups", "skills_required": ["Class C License"], "hours": 4}
+        ],
+        "workers": [
+          {"id": "W1", "name": "Pete", "skills": ["Class A License", "Class B License", "Class C License", "Hazmat"], "available_hours": 12},
+          {"id": "W2", "name": "Quinn", "skills": ["Class B License", "Class C License"], "available_hours": 10},
+          {"id": "W3", "name": "Rita", "skills": ["Class C License"], "available_hours": 8}
+        ]
+      },
+      "hard_constraints": [
+        "Driver must have required license(s) for the route",
+        "No driver can exceed available hours",
+        "All routes must be completed"
+      ],
+      "soft_constraints": ["Minimize total driver hours used"],
+      "ground_truth": {
+        "valid_assignments": [
+          {"task_id": "T1", "worker_id": "W2"},
+          {"task_id": "T2", "worker_id": "W3"},
+          {"task_id": "T3", "worker_id": "W1"},
+          {"task_id": "T4", "worker_id": "W3"}
+        ]
+      }
+    },
+    {
+      "id": "resource_007",
+      "task_type": "resource_allocator",
+      "task_description": "Assign restaurant prep tasks to kitchen staff based on their station certifications.",
+      "problem_data": {
+        "tasks": [
+          {"id": "T1", "name": "Prep Vegetables", "skills_required": ["Prep Station"], "hours": 2},
+          {"id": "T2", "name": "Grill Proteins", "skills_required": ["Grill Station", "Food Safety"], "hours": 4},
+          {"id": "T3", "name": "Plate Desserts", "skills_required": ["Pastry Station"], "hours": 2},
+          {"id": "T4", "name": "Make Sauces", "skills_required": ["Sauce Station", "Food Safety"], "hours": 3},
+          {"id": "T5", "name": "Expedite Orders", "skills_required": ["Expeditor Certified"], "hours": 5}
+        ],
+        "workers": [
+          {"id": "W1", "name": "Sam", "skills": ["Prep Station", "Grill Station", "Food Safety"], "available_hours": 8},
+          {"id": "W2", "name": "Taylor", "skills": ["Pastry Station", "Prep Station"], "available_hours": 6},
+          {"id": "W3", "name": "Uma", "skills": ["Sauce Station", "Food Safety", "Expeditor Certified"], "available_hours": 8}
+        ]
+      },
+      "hard_constraints": [
+        "Staff must be certified for assigned station",
+        "No staff member exceeds available hours",
+        "All tasks must be completed"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "valid_assignments": [
+          {"task_id": "T1", "worker_id": "W2"},
+          {"task_id": "T2", "worker_id": "W1"},
+          {"task_id": "T3", "worker_id": "W2"},
+          {"task_id": "T4", "worker_id": "W3"},
+          {"task_id": "T5", "worker_id": "W3"}
+        ]
+      }
+    },
+    {
+      "id": "resource_008",
+      "task_type": "resource_allocator",
+      "task_description": "Complex scenario: Assign 8 software tasks to 5 developers with overlapping skills and tight hour constraints.",
+      "problem_data": {
+        "tasks": [
+          {"id": "T1", "name": "React Component", "skills_required": ["React", "TypeScript"], "hours": 4},
+          {"id": "T2", "name": "Node.js API", "skills_required": ["Node.js", "TypeScript"], "hours": 5},
+          {"id": "T3", "name": "PostgreSQL Schema", "skills_required": ["PostgreSQL", "SQL"], "hours": 3},
+          {"id": "T4", "name": "Redis Caching", "skills_required": ["Redis", "Node.js"], "hours": 2},
+          {"id": "T5", "name": "GraphQL Resolver", "skills_required": ["GraphQL", "TypeScript"], "hours": 4},
+          {"id": "T6", "name": "Unit Tests", "skills_required": ["Jest", "TypeScript"], "hours": 3},
+          {"id": "T7", "name": "Docker Setup", "skills_required": ["Docker", "Linux"], "hours": 2},
+          {"id": "T8", "name": "CI/CD Pipeline", "skills_required": ["GitHub Actions", "Docker"], "hours": 3}
+        ],
+        "workers": [
+          {"id": "W1", "name": "Vera", "skills": ["React", "TypeScript", "Jest"], "available_hours": 8},
+          {"id": "W2", "name": "Wade", "skills": ["Node.js", "TypeScript", "Redis", "GraphQL"], "available_hours": 8},
+          {"id": "W3", "name": "Xena", "skills": ["PostgreSQL", "SQL", "Docker", "Linux"], "available_hours": 6},
+          {"id": "W4", "name": "Yuri", "skills": ["GitHub Actions", "Docker", "Linux", "Jest", "TypeScript"], "available_hours": 8},
+          {"id": "W5", "name": "Zara", "skills": ["React", "TypeScript", "GraphQL", "Jest"], "available_hours": 8}
+        ]
+      },
+      "hard_constraints": [
+        "Developer must have all required skills",
+        "No developer exceeds available hours",
+        "All tasks must be assigned"
+      ],
+      "soft_constraints": ["Balance workload across team"],
+      "ground_truth": {
+        "valid_assignments": [
+          {"task_id": "T1", "worker_id": "W1"},
+          {"task_id": "T2", "worker_id": "W2"},
+          {"task_id": "T3", "worker_id": "W3"},
+          {"task_id": "T4", "worker_id": "W2"},
+          {"task_id": "T5", "worker_id": "W5"},
+          {"task_id": "T6", "worker_id": "W4"},
+          {"task_id": "T7", "worker_id": "W3"},
+          {"task_id": "T8", "worker_id": "W4"}
+        ],
+        "note": "W1: 4h, W2: 7h, W3: 5h, W4: 6h, W5: 4h"
+      }
+    },
+    {
+      "id": "resource_009",
+      "task_type": "resource_allocator",
+      "task_description": "Assign film production tasks to crew members with specific equipment certifications.",
+      "problem_data": {
+        "tasks": [
+          {"id": "T1", "name": "Camera Operation", "skills_required": ["Camera Op", "RED Camera"], "hours": 8},
+          {"id": "T2", "name": "Sound Recording", "skills_required": ["Sound", "Boom Op"], "hours": 8},
+          {"id": "T3", "name": "Lighting Setup", "skills_required": ["Gaffer", "Electrical"], "hours": 6},
+          {"id": "T4", "name": "Drone Shots", "skills_required": ["Drone Pilot", "FAA Part 107"], "hours": 3},
+          {"id": "T5", "name": "Steadicam Shots", "skills_required": ["Camera Op", "Steadicam"], "hours": 4}
+        ],
+        "workers": [
+          {"id": "W1", "name": "Director of Photography", "skills": ["Camera Op", "RED Camera", "Steadicam"], "available_hours": 12},
+          {"id": "W2", "name": "Sound Mixer", "skills": ["Sound", "Boom Op", "Audio Post"], "available_hours": 10},
+          {"id": "W3", "name": "Gaffer", "skills": ["Gaffer", "Electrical", "Best Boy"], "available_hours": 8},
+          {"id": "W4", "name": "Drone Operator", "skills": ["Drone Pilot", "FAA Part 107", "Camera Op"], "available_hours": 6}
+        ]
+      },
+      "hard_constraints": [
+        "Crew must have all required certifications",
+        "No crew member exceeds available hours",
+        "All tasks must be covered"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "valid_assignments": [
+          {"task_id": "T1", "worker_id": "W1"},
+          {"task_id": "T2", "worker_id": "W2"},
+          {"task_id": "T3", "worker_id": "W3"},
+          {"task_id": "T4", "worker_id": "W4"},
+          {"task_id": "T5", "worker_id": "W1"}
+        ]
+      }
+    },
+    {
+      "id": "resource_010",
+      "task_type": "resource_allocator",
+      "task_description": "Tight constraint scenario: Assign 4 tasks where workers are exactly at capacity limits.",
+      "problem_data": {
+        "tasks": [
+          {"id": "T1", "name": "Task Alpha", "skills_required": ["Skill A"], "hours": 4},
+          {"id": "T2", "name": "Task Beta", "skills_required": ["Skill B"], "hours": 4},
+          {"id": "T3", "name": "Task Gamma", "skills_required": ["Skill A", "Skill B"], "hours": 4},
+          {"id": "T4", "name": "Task Delta", "skills_required": ["Skill C"], "hours": 4}
+        ],
+        "workers": [
+          {"id": "W1", "name": "Worker One", "skills": ["Skill A", "Skill B"], "available_hours": 8},
+          {"id": "W2", "name": "Worker Two", "skills": ["Skill B", "Skill C"], "available_hours": 8}
+        ]
+      },
+      "hard_constraints": [
+        "All required skills must be present",
+        "Exact capacity limits (no overflows)",
+        "All tasks assigned"
+      ],
+      "soft_constraints": [],
+      "ground_truth": {
+        "valid_assignments": [
+          {"task_id": "T1", "worker_id": "W1"},
+          {"task_id": "T2", "worker_id": "W2"},
+          {"task_id": "T3", "worker_id": "W1"},
+          {"task_id": "T4", "worker_id": "W2"}
+        ],
+        "note": "W1: 8h exactly, W2: 8h exactly"
+      }
+    }
+  ]
+}

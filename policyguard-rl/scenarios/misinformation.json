@@ -1,0 +1,422 @@
+[
+  {
+    "id": "misinfo_001",
+    "text": "BREAKING: Scientists confirm 5G towers cause cancer. Share before they delete this! #5GDanger",
+    "author_history": {"account_age_days": 30, "previous_violations": 2, "follower_count": 150},
+    "engagement": {"likes": 4500, "shares": 2800, "comments": 890, "reports": 45},
+    "context": "Post is going viral. Multiple fact-checkers have debunked 5G-cancer link.",
+    "ground_truth": {
+      "correct_decision": "remove",
+      "category": "misinformation",
+      "explanation": "False health misinformation. 5G-cancer link has been thoroughly debunked by WHO and multiple scientific studies.",
+      "trap_type": "engagement_bias",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "misinfo_002",
+    "text": "In my opinion, the new vaccine rollout was rushed and the government didn't do enough testing. I'm choosing to wait.",
+    "author_history": {"account_age_days": 1200, "previous_violations": 0, "follower_count": 450},
+    "engagement": {"likes": 230, "shares": 45, "comments": 120, "reports": 8},
+    "context": "User expressing personal health decision without making false claims.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Personal opinion about health choices. No false claims made. Protected speech.",
+      "trap_type": "topic_bias",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "misinfo_003",
+    "text": "Did you know that drinking lemon water every morning cures diabetes? My aunt tried it and she's off insulin now! 🍋",
+    "author_history": {"account_age_days": 90, "previous_violations": 0, "follower_count": 800},
+    "engagement": {"likes": 1200, "shares": 890, "comments": 340, "reports": 12},
+    "context": "Health advice post gaining traction. No medical credentials mentioned.",
+    "ground_truth": {
+      "correct_decision": "label",
+      "category": "misinformation",
+      "explanation": "Potentially harmful health misinformation. Should add label directing to verified health sources, not full removal as user may genuinely believe this.",
+      "trap_type": "anecdote_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "misinfo_004",
+    "text": "The Onion: 'Area Man Discovers Secret Government Mind Control Program Hidden in Terms of Service Agreement'",
+    "author_history": {"account_age_days": 5000, "previous_violations": 0, "follower_count": 2500000},
+    "engagement": {"likes": 45000, "shares": 12000, "comments": 3400, "reports": 2},
+    "context": "Shared from The Onion's official verified account.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Satire from known satirical publication. Clear context that this is humor.",
+      "trap_type": "literal_interpretation",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "misinfo_005",
+    "text": "exposed exposed exposed the election was STOLEN proof inside exposed exposed",
+    "author_history": {"account_age_days": 15, "previous_violations": 0, "follower_count": 23},
+    "engagement": {"likes": 89, "shares": 45, "comments": 34, "reports": 6},
+    "context": "Links to conspiracy website. No credible evidence provided.",
+    "ground_truth": {
+      "correct_decision": "remove",
+      "category": "misinformation",
+      "explanation": "Election misinformation without evidence. Pattern of spam-like behavior (repeated words).",
+      "trap_type": "recency_bias",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "misinfo_006",
+    "text": "New study from Harvard suggests moderate coffee consumption may reduce risk of heart disease. Link to study in bio.",
+    "author_history": {"account_age_days": 800, "previous_violations": 0, "follower_count": 12000},
+    "engagement": {"likes": 890, "shares": 234, "comments": 89, "reports": 0},
+    "context": "User is a health blogger. Study link is legitimate Harvard research.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Accurate reporting of legitimate scientific study with proper attribution.",
+      "trap_type": "none",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "misinfo_007",
+    "text": "EXPOSED: Exposed Documents Show Exposed Government Coverup of Exposed Alien Technology - They Don't Want You To Know!",
+    "author_history": {"account_age_days": 45, "previous_violations": 3, "follower_count": 890},
+    "engagement": {"likes": 3400, "shares": 1200, "comments": 567, "reports": 23},
+    "context": "Links to clickbait website. Previous violations for misinformation.",
+    "ground_truth": {
+      "correct_decision": "remove",
+      "category": "misinformation",
+      "explanation": "Clickbait conspiracy content from repeat offender. No credible sources.",
+      "trap_type": "engagement_bias",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "misinfo_008",
+    "text": "Unpopular opinion: I think the media is exaggerating the severity of the current economic situation. Here's my analysis based on historical data...",
+    "author_history": {"account_age_days": 2000, "previous_violations": 0, "follower_count": 5600},
+    "engagement": {"likes": 1200, "shares": 340, "comments": 456, "reports": 3},
+    "context": "Thread with charts and data analysis. User is an economist.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Opinion piece with supporting analysis. Disagreement with mainstream narrative is not misinformation.",
+      "trap_type": "authority_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "misinfo_009",
+    "text": "They're putting microchips in the water supply. I tested my tap water and found NANO PARTICLES. Wake up sheeple!!!",
+    "author_history": {"account_age_days": 120, "previous_violations": 1, "follower_count": 340},
+    "engagement": {"likes": 567, "shares": 234, "comments": 189, "reports": 34},
+    "context": "No evidence provided. 'Testing' methodology not explained.",
+    "ground_truth": {
+      "correct_decision": "label",
+      "category": "misinformation",
+      "explanation": "Conspiracy theory without evidence. Label with fact-check rather than remove to avoid amplifying 'censorship' narrative.",
+      "trap_type": "report_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "misinfo_010",
+    "text": "Local weather forecast: Heavy rain expected tomorrow. Bring your umbrellas! ☔",
+    "author_history": {"account_age_days": 3000, "previous_violations": 0, "follower_count": 45000},
+    "engagement": {"likes": 234, "shares": 56, "comments": 23, "reports": 0},
+    "context": "Local news station account sharing weather forecast.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Legitimate weather information from credible local news source.",
+      "trap_type": "none",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "misinfo_011",
+    "text": "EXPOSED: The government is hiding the TRUE death toll. EXPOSED It's actually 10x higher than reported EXPOSED",
+    "author_history": {"account_age_days": 60, "previous_violations": 2, "follower_count": 120},
+    "engagement": {"likes": 890, "shares": 456, "comments": 234, "reports": 28},
+    "context": "No sources provided. Account has history of similar claims.",
+    "ground_truth": {
+      "correct_decision": "remove",
+      "category": "misinformation",
+      "explanation": "Unsubstantiated conspiracy claim about public health data. Repeat offender pattern.",
+      "trap_type": "pattern_matching",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "misinfo_012",
+    "text": "I'm not a doctor, but my grandmother always said honey and garlic can cure a cold. It worked for me last week!",
+    "author_history": {"account_age_days": 1500, "previous_violations": 0, "follower_count": 230},
+    "engagement": {"likes": 89, "shares": 12, "comments": 34, "reports": 0},
+    "context": "Personal anecdote about home remedy.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Personal anecdote with appropriate disclaimer ('not a doctor'). Home remedy discussion is allowed.",
+      "trap_type": "health_topic_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "misinfo_013",
+    "text": "EXPOSED: Major bank CEO secretly meeting with politicians - photo evidence inside! This is corruption at the highest level!",
+    "author_history": {"account_age_days": 400, "previous_violations": 0, "follower_count": 8900},
+    "engagement": {"likes": 12000, "shares": 4500, "comments": 2300, "reports": 45},
+    "context": "Photo shows CEO at public industry conference with politicians. Event was publicly announced.",
+    "ground_truth": {
+      "correct_decision": "label",
+      "category": "misinformation",
+      "explanation": "Misleading framing of public event as 'secret meeting'. Photo is real but context is manipulated.",
+      "trap_type": "engagement_bias",
+      "difficulty": "hard"
+    }
+  },
+  {
+    "id": "misinfo_014",
+    "text": "Scientists BAFFLED as mysterious lights appear over city - could this be first contact? 👽",
+    "author_history": {"account_age_days": 200, "previous_violations": 0, "follower_count": 1200},
+    "engagement": {"likes": 3400, "shares": 890, "comments": 567, "reports": 8},
+    "context": "Lights were from a SpaceX Starlink satellite deployment, widely reported.",
+    "ground_truth": {
+      "correct_decision": "label",
+      "category": "misinformation",
+      "explanation": "Speculative claim ignoring known explanation. Add context label linking to verified explanation.",
+      "trap_type": "novelty_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "misinfo_015",
+    "text": "Thread: I've been researching the history of [controversial topic] and found some interesting primary sources. Here's what I learned... 1/",
+    "author_history": {"account_age_days": 2500, "previous_violations": 0, "follower_count": 15000},
+    "engagement": {"likes": 890, "shares": 234, "comments": 456, "reports": 12},
+    "context": "Academic researcher sharing historical analysis with citations.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Academic research with sources. Controversial topic discussion is not automatically misinformation.",
+      "trap_type": "topic_sensitivity_bias",
+      "difficulty": "hard"
+    }
+  },
+  {
+    "id": "misinfo_016",
+    "text": "exposed exposed exposed exposed - exposed exposed news anchor exposed exposed caught LYING exposed exposed on camera - exposed exposed PROOF exposed",
+    "author_history": {"account_age_days": 7, "previous_violations": 0, "follower_count": 12},
+    "engagement": {"likes": 23, "shares": 8, "comments": 5, "reports": 2},
+    "context": "New account with spam-like behavior pattern.",
+    "ground_truth": {
+      "correct_decision": "remove",
+      "category": "spam",
+      "explanation": "Spam pattern behavior. New account, repetitive text, unsubstantiated claims.",
+      "trap_type": "none",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "misinfo_017",
+    "text": "The mainstream media won't tell you this: there are actually multiple peer-reviewed studies questioning the official narrative. Here are the DOIs...",
+    "author_history": {"account_age_days": 1800, "previous_violations": 0, "follower_count": 4500},
+    "engagement": {"likes": 2300, "shares": 890, "comments": 567, "reports": 23},
+    "context": "Links to actual peer-reviewed studies that present minority scientific viewpoint.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Legitimate scientific debate. Minority viewpoints in peer-reviewed literature are valid discourse.",
+      "trap_type": "consensus_bias",
+      "difficulty": "hard"
+    }
+  },
+  {
+    "id": "misinfo_018",
+    "text": "Just saw this wild video of a politician saying [misleading quote]. Can't believe they actually said this!",
+    "author_history": {"account_age_days": 600, "previous_violations": 0, "follower_count": 890},
+    "engagement": {"likes": 5600, "shares": 2300, "comments": 890, "reports": 34},
+    "context": "Video is edited to remove context. Full quote has different meaning.",
+    "ground_truth": {
+      "correct_decision": "label",
+      "category": "misinformation",
+      "explanation": "Manipulated media - quote taken out of context. Add label with full context.",
+      "trap_type": "engagement_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "misinfo_019",
+    "text": "I work in [industry] and I can tell you firsthand that what they're reporting is not accurate. Here's what's really happening...",
+    "author_history": {"account_age_days": 3000, "previous_violations": 0, "follower_count": 2300},
+    "engagement": {"likes": 1200, "shares": 456, "comments": 234, "reports": 5},
+    "context": "Whistleblower-style post. Cannot verify employment claims but details are specific.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "First-person account. Cannot verify but also cannot disprove. Not clear misinformation.",
+      "trap_type": "verification_bias",
+      "difficulty": "hard"
+    }
+  },
+  {
+    "id": "misinfo_020",
+    "text": "EXPOSED NEWS: EXPOSED The EXPOSED truth about EXPOSED [celebrity] EXPOSED will EXPOSED shock you! EXPOSED Click here! EXPOSED",
+    "author_history": {"account_age_days": 3, "previous_violations": 0, "follower_count": 5},
+    "engagement": {"likes": 2, "shares": 1, "comments": 0, "reports": 1},
+    "context": "Obvious spam/clickbait pattern from new account.",
+    "ground_truth": {
+      "correct_decision": "remove",
+      "category": "spam",
+      "explanation": "Clear spam pattern. New account, clickbait, no real content.",
+      "trap_type": "none",
+      "difficulty": "easy"
+    }
+  },
+  {
+    "id": "misinfo_021",
+    "text": "Exposed: Major tech company caught sharing user data with government agencies without warrants - documents leaked",
+    "author_history": {"account_age_days": 2000, "previous_violations": 0, "follower_count": 45000},
+    "engagement": {"likes": 23000, "shares": 12000, "comments": 5600, "reports": 89},
+    "context": "Journalist account. Links to leaked documents that appear authentic. Story being picked up by other outlets.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Breaking news from journalist with apparent documentation. Allow pending verification.",
+      "trap_type": "authority_bias",
+      "difficulty": "hard"
+    }
+  },
+  {
+    "id": "misinfo_022",
+    "text": "My doctor told me to stop taking my medication and try essential oils instead. Best decision I ever made!",
+    "author_history": {"account_age_days": 400, "previous_violations": 0, "follower_count": 670},
+    "engagement": {"likes": 890, "shares": 345, "comments": 234, "reports": 18},
+    "context": "Promoting stopping medication in favor of unproven remedies.",
+    "ground_truth": {
+      "correct_decision": "label",
+      "category": "misinformation",
+      "explanation": "Dangerous health advice that could lead to harm. Claim about doctor recommendation is unverifiable. Add health information label.",
+      "trap_type": "anecdote_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "misinfo_023",
+    "text": "EXPOSED! EXPOSED! The REAL reason gas prices are high (hint: it's not what they tell you) EXPOSED!",
+    "author_history": {"account_age_days": 180, "previous_violations": 1, "follower_count": 450},
+    "engagement": {"likes": 2300, "shares": 890, "comments": 456, "reports": 23},
+    "context": "Links to partisan blog with unverified economic claims.",
+    "ground_truth": {
+      "correct_decision": "label",
+      "category": "misinformation",
+      "explanation": "Misleading economic claims presented as 'exposed' truth. Add context about energy market complexity.",
+      "trap_type": "simplification_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "misinfo_024",
+    "text": "Historical fact: The Great Wall of China is visible from space with the naked eye.",
+    "author_history": {"account_age_days": 900, "previous_violations": 0, "follower_count": 1200},
+    "engagement": {"likes": 456, "shares": 123, "comments": 89, "reports": 3},
+    "context": "Educational-style post sharing common misconception.",
+    "ground_truth": {
+      "correct_decision": "label",
+      "category": "misinformation",
+      "explanation": "Common misconception. Great Wall is not visible from space with naked eye. Add fact-check label.",
+      "trap_type": "common_knowledge_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "misinfo_025",
+    "text": "Can we talk about how the timing of this news is suspicious? Right before the election? I'm not saying it's fake but... 🤔",
+    "author_history": {"account_age_days": 1500, "previous_violations": 0, "follower_count": 3400},
+    "engagement": {"likes": 1200, "shares": 456, "comments": 345, "reports": 8},
+    "context": "User questioning timing of legitimate news story without making false claims.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Skepticism about news timing is protected opinion. No false claims made.",
+      "trap_type": "topic_sensitivity_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "misinfo_026",
+    "text": "exposed exposed EXPOSED exposed exposed: exposed exposed politician exposed exposed caught exposed exposed with EXPOSED exposed lobby exposed EXPOSED donations! EXPOSED",
+    "author_history": {"account_age_days": 10, "previous_violations": 0, "follower_count": 15},
+    "engagement": {"likes": 34, "shares": 12, "comments": 8, "reports": 5},
+    "context": "Links to public campaign finance records that show normal lobbying activity.",
+    "ground_truth": {
+      "correct_decision": "remove",
+      "category": "spam",
+      "explanation": "Spam presentation pattern. While underlying data may be accurate, presentation is spam-like and sensationalizing normal political activity.",
+      "trap_type": "none",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "misinfo_027",
+    "text": "Climate change is a hoax invented by China to destroy American manufacturing. exposed exposed The data is ALL fabricated!",
+    "author_history": {"account_age_days": 500, "previous_violations": 2, "follower_count": 890},
+    "engagement": {"likes": 3400, "shares": 1200, "comments": 890, "reports": 56},
+    "context": "Conspiracy theory contradicting scientific consensus.",
+    "ground_truth": {
+      "correct_decision": "label",
+      "category": "misinformation",
+      "explanation": "Climate denial misinformation. Add label linking to scientific consensus, but don't remove as this is a widely-held opinion.",
+      "trap_type": "political_bias",
+      "difficulty": "hard"
+    }
+  },
+  {
+    "id": "misinfo_028",
+    "text": "FYI: I checked the FDA website and found that [drug] was never actually FDA approved for [use]. Link to FDA database here.",
+    "author_history": {"account_age_days": 2000, "previous_violations": 0, "follower_count": 5600},
+    "engagement": {"likes": 890, "shares": 345, "comments": 234, "reports": 12},
+    "context": "User sharing verifiable FDA database information with direct link.",
+    "ground_truth": {
+      "correct_decision": "allow",
+      "category": "none",
+      "explanation": "Verifiable public information with source link. Allow user to share government database info.",
+      "trap_type": "topic_sensitivity_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "misinfo_029",
+    "text": "EXPOSED: Underground tunnels discovered beneath [city]. Government refuses to explain. What are they hiding?!",
+    "author_history": {"account_age_days": 300, "previous_violations": 1, "follower_count": 2300},
+    "engagement": {"likes": 8900, "shares": 4500, "comments": 2300, "reports": 67},
+    "context": "Photos show maintenance tunnels that are publicly documented in city infrastructure records.",
+    "ground_truth": {
+      "correct_decision": "label",
+      "category": "misinformation",
+      "explanation": "Misleading framing of normal infrastructure as conspiracy. Add context about public utility tunnels.",
+      "trap_type": "engagement_bias",
+      "difficulty": "medium"
+    }
+  },
+  {
+    "id": "misinfo_030",
+    "text": "Just so everyone knows: you can refuse a breathalyzer test and they legally can't do anything about it. Know your rights!",
+    "author_history": {"account_age_days": 600, "previous_violations": 0, "follower_count": 1200},
+    "engagement": {"likes": 2300, "shares": 890, "comments": 456, "reports": 23},
+    "context": "Legal advice post. Laws vary by jurisdiction but most have implied consent laws.",
+    "ground_truth": {
+      "correct_decision": "label",
+      "category": "misinformation",
+      "explanation": "Incorrect legal advice that could cause real harm. Most jurisdictions have implied consent laws with penalties for refusal.",
+      "trap_type": "authority_bias",
+      "difficulty": "medium"
+    }
+  }
+]

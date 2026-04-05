@@ -1,0 +1,35 @@
+name: constraint-solver-arena
+version: 1.0.0
+description: Constraint Satisfaction Benchmark - Exposing LLM failures in multi-constraint planning and scheduling
+
+environment:
+  type: openenv
+  action_space: ConstraintAction
+  observation_space: ConstraintObservation
+  
+tasks:
+  - name: meeting_scheduler
+    description: Schedule meetings satisfying multiple participant time windows and room constraints
+    difficulty: easy
+    
+  - name: resource_allocator
+    description: Assign tasks to workers with skill requirements and availability constraints
+    difficulty: medium
+    
+  - name: travel_planner
+    description: Plan trips with budget, time, and dependency constraints across multiple activities
+    difficulty: hard
+
+metrics:
+  - name: constraint_satisfaction
+    description: Percentage of hard constraints satisfied (0.0 to 1.0)
+    
+  - name: solution_validity
+    description: Whether the solution is valid (all hard constraints met)
+
+tags:
+  - constraint-satisfaction
+  - planning
+  - scheduling
+  - reasoning
+  - benchmark

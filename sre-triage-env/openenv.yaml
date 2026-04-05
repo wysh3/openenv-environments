@@ -1,0 +1,35 @@
+name: sre-triage-env
+version: 1.0.0
+description: SRE Incident Response Triage environment for testing agent decision-making under pressure
+
+environment:
+  type: openenv
+  action_space: SREAction
+  observation_space: SREObservation
+  
+tasks:
+  - name: severity_classification
+    description: Classify incident severity (P1-P5) based on metrics and alerts
+    difficulty: variable
+    
+  - name: root_cause_analysis
+    description: Identify the service causing cascading failures
+    difficulty: variable
+    
+  - name: silent_failure_detection
+    description: Detect incidents without obvious alerts or distinguish from normal operations
+    difficulty: variable
+
+metrics:
+  - name: accuracy
+    description: Percentage of correct classifications
+    
+  - name: avg_score
+    description: Average score across all scenarios (0.0 to 1.0)
+
+tags:
+  - incident-response
+  - sre
+  - monitoring
+  - troubleshooting
+  - operations

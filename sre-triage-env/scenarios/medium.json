@@ -1,0 +1,672 @@
+{
+  "difficulty": "medium",
+  "description": "Multi-service cascading failures requiring careful analysis",
+  "scenarios": [
+    {
+      "id": "med_001",
+      "task_type": "root_cause",
+      "task_description": "Complex cascading failure across multiple services. Identify the original root cause.",
+      "metrics": {
+        "web_gateway": {"cpu": 72, "memory": 68, "error_rate": 0.15, "latency_p99": 4200},
+        "session_service": {"cpu": 88, "memory": 85, "error_rate": 0.28, "latency_p99": 8500},
+        "redis_cluster": {"cpu": 45, "memory": 98, "error_rate": 0.0, "latency_p99": 2400},
+        "auth_service": {"cpu": 78, "memory": 72, "error_rate": 0.22, "latency_p99": 6800}
+      },
+      "alerts": [
+        {"service": "redis_cluster", "type": "CriticalMemory", "threshold": "90%", "current": "98%", "duration": "15m"},
+        {"service": "session_service", "type": "HighErrorRate", "threshold": "0.05", "current": "0.28", "duration": "12m"},
+        {"service": "auth_service", "type": "HighErrorRate", "threshold": "0.05", "current": "0.22", "duration": "10m"},
+        {"service": "web_gateway", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.15", "duration": "8m"}
+      ],
+      "logs": [
+        "[redis_cluster] ERROR: Memory limit reached, evicting keys",
+        "[redis_cluster] WARN: Max memory policy: volatile-lru active",
+        "[session_service] ERROR: Session read failed: key not found",
+        "[session_service] ERROR: Cache miss rate: 94%",
+        "[auth_service] ERROR: Unable to validate session token",
+        "[auth_service] WARN: Session validation failures increasing",
+        "[web_gateway] ERROR: Authentication failed for request",
+        "[web_gateway] INFO: Routing authenticated requests normally"
+      ],
+      "service_dependencies": {
+        "web_gateway": ["auth_service", "session_service"],
+        "auth_service": ["session_service", "user_db"],
+        "session_service": ["redis_cluster"]
+      },
+      "previous_incidents": [
+        {"date": "2024-02-10", "service": "redis_cluster", "cause": "memory leak in session service"}
+      ],
+      "ground_truth": {
+        "severity": "P1",
+        "affected_service": "redis_cluster",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "med_002",
+      "task_type": "severity",
+      "task_description": "Assess severity with competing signals from multiple affected services.",
+      "metrics": {
+        "recommendation_engine": {"cpu": 92, "memory": 88, "error_rate": 0.32, "latency_p99": 18000},
+        "content_api": {"cpu": 58, "memory": 62, "error_rate": 0.08, "latency_p99": 2200},
+        "user_activity": {"cpu": 42, "memory": 48, "error_rate": 0.02, "latency_p99": 380}
+      },
+      "alerts": [
+        {"service": "recommendation_engine", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.32", "duration": "18m"},
+        {"service": "recommendation_engine", "type": "HighLatency", "threshold": "5000ms", "current": "18000ms", "duration": "18m"},
+        {"service": "content_api", "type": "ModerateErrorRate", "threshold": "0.05", "current": "0.08", "duration": "15m"}
+      ],
+      "logs": [
+        "[recommendation_engine] ERROR: ML model inference timeout",
+        "[recommendation_engine] ERROR: Failed to fetch user embeddings",
+        "[recommendation_engine] WARN: Falling back to popularity-based recommendations",
+        "[content_api] WARN: Recommendation service degraded, using cached results",
+        "[content_api] INFO: Serving homepage with default content",
+        "[user_activity] INFO: Recording user interactions normally"
+      ],
+      "service_dependencies": {
+        "content_api": ["recommendation_engine", "content_db"],
+        "recommendation_engine": ["ml_serving", "feature_store"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P3",
+        "affected_service": "recommendation_engine",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "med_003",
+      "task_type": "silent_failure",
+      "task_description": "Subtle degradation that may or may not constitute an incident. Metrics show mixed signals.",
+      "metrics": {
+        "order_processor": {"cpu": 58, "memory": 72, "error_rate": 0.04, "latency_p99": 1200},
+        "inventory_sync": {"cpu": 48, "memory": 65, "error_rate": 0.0, "latency_p99": 850},
+        "warehouse_api": {"cpu": 35, "memory": 42, "error_rate": 0.0, "latency_p99": 420}
+      },
+      "alerts": [],
+      "logs": [
+        "[order_processor] WARN: Inventory sync delay: 45 seconds",
+        "[order_processor] INFO: Orders processed: 2840/hour (avg: 3200/hour)",
+        "[inventory_sync] INFO: Syncing warehouse stock levels",
+        "[inventory_sync] INFO: Last sync: 48 seconds ago",
+        "[warehouse_api] INFO: API responding normally",
+        "[warehouse_api] INFO: Response time: 380ms p99"
+      ],
+      "service_dependencies": {
+        "order_processor": ["inventory_sync", "payment_service"],
+        "inventory_sync": ["warehouse_api", "inventory_db"]
+      },
+      "previous_incidents": [
+        {"date": "2024-01-25", "service": "inventory_sync", "cause": "warehouse API maintenance window"}
+      ],
+      "ground_truth": {
+        "severity": "P4",
+        "affected_service": "inventory_sync",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "med_004",
+      "task_type": "root_cause",
+      "task_description": "Network partitioning causing partial failures. Identify the true culprit.",
+      "metrics": {
+        "service_mesh_proxy": {"cpu": 85, "memory": 78, "error_rate": 0.25, "latency_p99": 9500},
+        "payments_us": {"cpu": 62, "memory": 58, "error_rate": 0.18, "latency_p99": 5200},
+        "payments_eu": {"cpu": 38, "memory": 45, "error_rate": 0.02, "latency_p99": 280},
+        "payment_orchestrator": {"cpu": 75, "memory": 68, "error_rate": 0.15, "latency_p99": 6800}
+      },
+      "alerts": [
+        {"service": "service_mesh_proxy", "type": "HighErrorRate", "threshold": "0.05", "current": "0.25", "duration": "8m"},
+        {"service": "payments_us", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.18", "duration": "8m"},
+        {"service": "payment_orchestrator", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.15", "duration": "6m"}
+      ],
+      "logs": [
+        "[service_mesh_proxy] ERROR: Circuit breaker open for payments_us",
+        "[service_mesh_proxy] ERROR: Connection timeout to us-east-1 region",
+        "[service_mesh_proxy] WARN: Routing traffic to alternate regions",
+        "[payments_us] ERROR: Health check failed: timeout",
+        "[payments_us] WARN: Unable to reach downstream services",
+        "[payments_eu] INFO: Processing payments normally",
+        "[payment_orchestrator] WARN: US region unavailable, routing to EU"
+      ],
+      "service_dependencies": {
+        "payment_orchestrator": ["payments_us", "payments_eu", "payments_asia"],
+        "payments_us": ["service_mesh_proxy", "fraud_detector"],
+        "payments_eu": ["service_mesh_proxy", "fraud_detector"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P2",
+        "affected_service": "service_mesh_proxy",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "med_005",
+      "task_type": "severity",
+      "task_description": "Resource exhaustion affecting non-critical path. Determine appropriate priority.",
+      "metrics": {
+        "audit_logger": {"cpu": 88, "memory": 92, "error_rate": 0.45, "latency_p99": 25000},
+        "main_api": {"cpu": 45, "memory": 52, "error_rate": 0.0, "latency_p99": 180},
+        "compliance_exporter": {"cpu": 62, "memory": 68, "error_rate": 0.12, "latency_p99": 4200}
+      },
+      "alerts": [
+        {"service": "audit_logger", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.45", "duration": "35m"},
+        {"service": "audit_logger", "type": "HighMemory", "threshold": "85%", "current": "92%", "duration": "40m"},
+        {"service": "compliance_exporter", "type": "ModerateErrorRate", "threshold": "0.05", "current": "0.12", "duration": "30m"}
+      ],
+      "logs": [
+        "[audit_logger] ERROR: Kafka producer buffer full",
+        "[audit_logger] ERROR: Unable to write audit event",
+        "[audit_logger] WARN: Dropping audit events - buffer overflow",
+        "[main_api] INFO: API requests processing normally",
+        "[compliance_exporter] ERROR: Failed to fetch audit events",
+        "[compliance_exporter] WARN: Compliance export delayed"
+      ],
+      "service_dependencies": {
+        "main_api": ["audit_logger", "user_service"],
+        "compliance_exporter": ["audit_logger", "s3_archive"]
+      },
+      "previous_incidents": [
+        {"date": "2024-02-05", "service": "audit_logger", "cause": "traffic spike during marketing campaign"}
+      ],
+      "ground_truth": {
+        "severity": "P3",
+        "affected_service": "audit_logger",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "med_006",
+      "task_type": "silent_failure",
+      "task_description": "Investigate metrics that could indicate either incident or planned activity.",
+      "metrics": {
+        "migration_worker": {"cpu": 78, "memory": 82, "error_rate": 0.08, "latency_p99": 2800},
+        "legacy_db": {"cpu": 65, "memory": 88, "error_rate": 0.0, "latency_p99": 1200},
+        "new_db": {"cpu": 55, "memory": 72, "error_rate": 0.0, "latency_p99": 450}
+      },
+      "alerts": [],
+      "logs": [
+        "[migration_worker] WARN: Retry on record migration failure",
+        "[migration_worker] INFO: Migrated 458000 / 500000 records",
+        "[migration_worker] WARN: 4200 records failed validation",
+        "[migration_worker] INFO: Retry queue: 4200 items",
+        "[legacy_db] INFO: Read operations: 2400/sec",
+        "[new_db] INFO: Write operations: 1800/sec",
+        "[new_db] INFO: Replication lag: 2.1 seconds"
+      ],
+      "service_dependencies": {
+        "migration_worker": ["legacy_db", "new_db", "validation_service"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "NONE",
+        "affected_service": "",
+        "is_incident": false
+      }
+    },
+    {
+      "id": "med_007",
+      "task_type": "root_cause",
+      "task_description": "Distributed system with correlated failures. Find the initiating cause.",
+      "metrics": {
+        "api_gateway": {"cpu": 68, "memory": 72, "error_rate": 0.18, "latency_p99": 8200},
+        "rate_limiter": {"cpu": 95, "memory": 89, "error_rate": 0.0, "latency_p99": 4500},
+        "user_service": {"cpu": 55, "memory": 58, "error_rate": 0.12, "latency_p99": 3200},
+        "product_service": {"cpu": 48, "memory": 52, "error_rate": 0.08, "latency_p99": 2800}
+      },
+      "alerts": [
+        {"service": "rate_limiter", "type": "CriticalCPU", "threshold": "90%", "current": "95%", "duration": "12m"},
+        {"service": "api_gateway", "type": "HighErrorRate", "threshold": "0.05", "current": "0.18", "duration": "10m"},
+        {"service": "user_service", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.12", "duration": "8m"}
+      ],
+      "logs": [
+        "[rate_limiter] ERROR: Redis Lua script timeout",
+        "[rate_limiter] WARN: Rate limit check taking 4.2s average",
+        "[rate_limiter] ERROR: Falling back to allow-all mode",
+        "[api_gateway] ERROR: Rate limiter timeout, bypassing check",
+        "[api_gateway] WARN: Unthrottled traffic reaching backends",
+        "[user_service] WARN: Request rate spike: 15x normal",
+        "[product_service] WARN: Unusual traffic pattern detected"
+      ],
+      "service_dependencies": {
+        "api_gateway": ["rate_limiter", "user_service", "product_service"],
+        "rate_limiter": ["redis_ratelimit"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P1",
+        "affected_service": "rate_limiter",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "med_008",
+      "task_type": "severity",
+      "task_description": "Partial service degradation with workarounds active. Assess impact level.",
+      "metrics": {
+        "video_transcoder": {"cpu": 72, "memory": 78, "error_rate": 0.28, "latency_p99": 45000},
+        "video_upload": {"cpu": 42, "memory": 48, "error_rate": 0.0, "latency_p99": 1200},
+        "cdn_delivery": {"cpu": 35, "memory": 42, "error_rate": 0.0, "latency_p99": 85}
+      },
+      "alerts": [
+        {"service": "video_transcoder", "type": "HighErrorRate", "threshold": "0.05", "current": "0.28", "duration": "45m"},
+        {"service": "video_transcoder", "type": "HighLatency", "threshold": "15000ms", "current": "45000ms", "duration": "45m"}
+      ],
+      "logs": [
+        "[video_transcoder] ERROR: GPU allocation failed for 1080p transcode",
+        "[video_transcoder] WARN: Falling back to CPU transcoding",
+        "[video_transcoder] INFO: Queue depth: 240 videos",
+        "[video_upload] INFO: Uploads completing successfully",
+        "[video_upload] INFO: Raw videos stored in S3",
+        "[cdn_delivery] INFO: Serving previously transcoded content"
+      ],
+      "service_dependencies": {
+        "video_upload": ["video_transcoder", "storage_s3"],
+        "cdn_delivery": ["video_transcoder", "cdn_origin"]
+      },
+      "previous_incidents": [
+        {"date": "2024-01-18", "service": "video_transcoder", "cause": "GPU node failure"}
+      ],
+      "ground_truth": {
+        "severity": "P3",
+        "affected_service": "video_transcoder",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "med_009",
+      "task_type": "silent_failure",
+      "task_description": "Background processing with elevated error rates. Determine if intervention needed.",
+      "metrics": {
+        "webhook_dispatcher": {"cpu": 68, "memory": 74, "error_rate": 0.15, "latency_p99": 8200},
+        "event_queue": {"cpu": 42, "memory": 58, "error_rate": 0.0, "latency_p99": 85},
+        "webhook_retry": {"cpu": 55, "memory": 62, "error_rate": 0.0, "latency_p99": 450}
+      },
+      "alerts": [],
+      "logs": [
+        "[webhook_dispatcher] WARN: Webhook delivery failed: Connection refused",
+        "[webhook_dispatcher] INFO: Customer endpoint: https://api.client-a.com",
+        "[webhook_dispatcher] WARN: Retry scheduled: attempt 2/5",
+        "[webhook_dispatcher] INFO: 720 webhooks delivered successfully",
+        "[webhook_dispatcher] WARN: 108 webhooks pending retry",
+        "[event_queue] INFO: Queue depth: 145 events",
+        "[webhook_retry] INFO: Processing retry queue normally"
+      ],
+      "service_dependencies": {
+        "webhook_dispatcher": ["event_queue", "webhook_retry"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "NONE",
+        "affected_service": "",
+        "is_incident": false
+      }
+    },
+    {
+      "id": "med_010",
+      "task_type": "root_cause",
+      "task_description": "Cross-region replication lag causing data inconsistencies. Find root cause.",
+      "metrics": {
+        "db_primary_us": {"cpu": 65, "memory": 72, "error_rate": 0.0, "latency_p99": 180},
+        "db_replica_eu": {"cpu": 88, "memory": 92, "error_rate": 0.0, "latency_p99": 850},
+        "replication_manager": {"cpu": 75, "memory": 82, "error_rate": 0.22, "latency_p99": 12000},
+        "read_api_eu": {"cpu": 48, "memory": 55, "error_rate": 0.18, "latency_p99": 2400}
+      },
+      "alerts": [
+        {"service": "db_replica_eu", "type": "HighReplicationLag", "threshold": "30s", "current": "280s", "duration": "25m"},
+        {"service": "replication_manager", "type": "HighErrorRate", "threshold": "0.05", "current": "0.22", "duration": "22m"},
+        {"service": "read_api_eu", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.18", "duration": "18m"}
+      ],
+      "logs": [
+        "[replication_manager] ERROR: Network timeout reading binlog position",
+        "[replication_manager] ERROR: Replication connection lost to us-east",
+        "[replication_manager] WARN: Replication lag: 280 seconds",
+        "[db_replica_eu] WARN: Applying transactions slowly",
+        "[db_replica_eu] INFO: IO thread: running, SQL thread: running",
+        "[read_api_eu] ERROR: Stale read detected: user record not found",
+        "[read_api_eu] WARN: Data consistency issues reported"
+      ],
+      "service_dependencies": {
+        "read_api_eu": ["db_replica_eu"],
+        "db_replica_eu": ["replication_manager", "db_primary_us"]
+      },
+      "previous_incidents": [
+        {"date": "2024-02-01", "service": "replication_manager", "cause": "cross-region network congestion"}
+      ],
+      "ground_truth": {
+        "severity": "P2",
+        "affected_service": "replication_manager",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "med_011",
+      "task_type": "severity",
+      "task_description": "Internal tooling failure with unclear business impact. Assess priority.",
+      "metrics": {
+        "ci_runner": {"cpu": 92, "memory": 88, "error_rate": 0.38, "latency_p99": 180000},
+        "artifact_storage": {"cpu": 42, "memory": 85, "error_rate": 0.0, "latency_p99": 1200},
+        "build_orchestrator": {"cpu": 68, "memory": 72, "error_rate": 0.15, "latency_p99": 8500}
+      },
+      "alerts": [
+        {"service": "ci_runner", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.38", "duration": "55m"},
+        {"service": "build_orchestrator", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.15", "duration": "50m"}
+      ],
+      "logs": [
+        "[ci_runner] ERROR: Docker daemon not responding",
+        "[ci_runner] ERROR: Build failed: cannot connect to daemon",
+        "[ci_runner] WARN: 24 builds queued, 0 running",
+        "[build_orchestrator] ERROR: No healthy CI runners available",
+        "[build_orchestrator] INFO: Queueing builds until runners recover",
+        "[artifact_storage] INFO: Storage healthy, serving artifacts"
+      ],
+      "service_dependencies": {
+        "build_orchestrator": ["ci_runner", "artifact_storage"],
+        "ci_runner": ["docker_daemon", "build_cache"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P4",
+        "affected_service": "ci_runner",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "med_012",
+      "task_type": "silent_failure",
+      "task_description": "Gradual performance degradation over time. Determine if immediate action required.",
+      "metrics": {
+        "search_indexer": {"cpu": 72, "memory": 88, "error_rate": 0.02, "latency_p99": 2800},
+        "elasticsearch": {"cpu": 68, "memory": 85, "error_rate": 0.0, "latency_p99": 1200},
+        "search_api": {"cpu": 45, "memory": 52, "error_rate": 0.0, "latency_p99": 380}
+      },
+      "alerts": [],
+      "logs": [
+        "[search_indexer] WARN: Index rebuild progress: 65% (8 hours elapsed)",
+        "[search_indexer] INFO: Indexing rate: 2400 docs/sec (avg: 4200 docs/sec)",
+        "[search_indexer] INFO: Est. completion: 4 hours",
+        "[elasticsearch] INFO: Cluster status: green",
+        "[elasticsearch] WARN: Shard allocation: rebalancing in progress",
+        "[search_api] INFO: Search queries responding normally",
+        "[search_api] INFO: Using existing index during rebuild"
+      ],
+      "service_dependencies": {
+        "search_indexer": ["elasticsearch", "product_db"],
+        "search_api": ["elasticsearch"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "NONE",
+        "affected_service": "",
+        "is_incident": false
+      }
+    },
+    {
+      "id": "med_013",
+      "task_type": "root_cause",
+      "task_description": "Security-related service disruption. Identify failing component quickly.",
+      "metrics": {
+        "auth_gateway": {"cpu": 78, "memory": 82, "error_rate": 0.32, "latency_p99": 15000},
+        "mfa_service": {"cpu": 95, "memory": 92, "error_rate": 0.48, "latency_p99": 28000},
+        "sms_provider": {"cpu": 22, "memory": 35, "error_rate": 0.0, "latency_p99": 850},
+        "user_db": {"cpu": 42, "memory": 58, "error_rate": 0.0, "latency_p99": 120}
+      },
+      "alerts": [
+        {"service": "mfa_service", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.48", "duration": "8m"},
+        {"service": "mfa_service", "type": "CriticalCPU", "threshold": "90%", "current": "95%", "duration": "10m"},
+        {"service": "auth_gateway", "type": "HighErrorRate", "threshold": "0.05", "current": "0.32", "duration": "7m"}
+      ],
+      "logs": [
+        "[mfa_service] ERROR: TOTP validation timeout",
+        "[mfa_service] ERROR: Unable to decrypt TOTP secret",
+        "[mfa_service] ERROR: KMS rate limit exceeded",
+        "[mfa_service] WARN: Falling back to SMS-only MFA",
+        "[auth_gateway] ERROR: MFA validation failed",
+        "[auth_gateway] WARN: User login blocked: MFA required",
+        "[sms_provider] INFO: SMS delivery working normally",
+        "[user_db] INFO: Database queries responding fast"
+      ],
+      "service_dependencies": {
+        "auth_gateway": ["mfa_service", "user_db"],
+        "mfa_service": ["kms_service", "sms_provider"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P1",
+        "affected_service": "mfa_service",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "med_014",
+      "task_type": "severity",
+      "task_description": "Third-party dependency failure with partial mitigation. Rate severity.",
+      "metrics": {
+        "address_validation": {"cpu": 65, "memory": 72, "error_rate": 0.42, "latency_p99": 18000},
+        "checkout_flow": {"cpu": 52, "memory": 58, "error_rate": 0.08, "latency_p99": 2400},
+        "order_placement": {"cpu": 45, "memory": 52, "error_rate": 0.0, "latency_p99": 480}
+      },
+      "alerts": [
+        {"service": "address_validation", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.42", "duration": "28m"},
+        {"service": "checkout_flow", "type": "ModerateErrorRate", "threshold": "0.05", "current": "0.08", "duration": "25m"}
+      ],
+      "logs": [
+        "[address_validation] ERROR: External API timeout: geocoding.maps.example.com",
+        "[address_validation] ERROR: HTTP 503 from address validation provider",
+        "[address_validation] WARN: Provider status page shows degradation",
+        "[checkout_flow] WARN: Skipping address validation step",
+        "[checkout_flow] INFO: Allowing unvalidated addresses",
+        "[order_placement] INFO: Orders completing successfully"
+      ],
+      "service_dependencies": {
+        "checkout_flow": ["address_validation", "order_placement"],
+        "address_validation": ["external_geocoding_api"]
+      },
+      "previous_incidents": [
+        {"date": "2024-01-12", "service": "address_validation", "cause": "third-party provider outage"}
+      ],
+      "ground_truth": {
+        "severity": "P4",
+        "affected_service": "address_validation",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "med_015",
+      "task_type": "silent_failure",
+      "task_description": "Monitoring system showing anomalies. Could be false positive or real issue.",
+      "metrics": {
+        "anomaly_detector": {"cpu": 82, "memory": 78, "error_rate": 0.0, "latency_p99": 1200},
+        "metrics_collector": {"cpu": 55, "memory": 62, "error_rate": 0.0, "latency_p99": 280},
+        "alert_manager": {"cpu": 48, "memory": 55, "error_rate": 0.0, "latency_p99": 180}
+      },
+      "alerts": [],
+      "logs": [
+        "[anomaly_detector] INFO: Detecting anomalies in metric streams",
+        "[anomaly_detector] INFO: ML model: production_v3",
+        "[anomaly_detector] INFO: Anomaly score: 0.72 (threshold: 0.85)",
+        "[anomaly_detector] INFO: Pattern: periodic traffic spike",
+        "[metrics_collector] INFO: Collecting 24k metrics/min",
+        "[alert_manager] INFO: No active alerts"
+      ],
+      "service_dependencies": {
+        "anomaly_detector": ["metrics_collector", "ml_inference"],
+        "alert_manager": ["anomaly_detector"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "NONE",
+        "affected_service": "",
+        "is_incident": false
+      }
+    },
+    {
+      "id": "med_016",
+      "task_type": "root_cause",
+      "task_description": "Intermittent failures making root cause analysis difficult. Identify the source.",
+      "metrics": {
+        "websocket_server": {"cpu": 68, "memory": 72, "error_rate": 0.22, "latency_p99": 4800},
+        "load_balancer": {"cpu": 85, "memory": 78, "error_rate": 0.0, "latency_p99": 1200},
+        "message_broker": {"cpu": 55, "memory": 82, "error_rate": 0.0, "latency_p99": 280},
+        "realtime_api": {"cpu": 62, "memory": 68, "error_rate": 0.18, "latency_p99": 3200}
+      },
+      "alerts": [
+        {"service": "load_balancer", "type": "HighCPU", "threshold": "80%", "current": "85%", "duration": "15m"},
+        {"service": "websocket_server", "type": "HighErrorRate", "threshold": "0.05", "current": "0.22", "duration": "12m"},
+        {"service": "realtime_api", "type": "ElevatedErrorRate", "threshold": "0.05", "current": "0.18", "duration": "10m"}
+      ],
+      "logs": [
+        "[load_balancer] ERROR: Health check failed for ws-node-3",
+        "[load_balancer] WARN: Removing ws-node-3 from rotation",
+        "[load_balancer] ERROR: Health check failed for ws-node-7",
+        "[load_balancer] WARN: 2 of 10 backend nodes marked unhealthy",
+        "[websocket_server] ERROR: Connection dropped: node shutdown",
+        "[websocket_server] WARN: Clients reconnecting to healthy nodes",
+        "[realtime_api] WARN: WebSocket connection failures",
+        "[message_broker] INFO: Message delivery working normally"
+      ],
+      "service_dependencies": {
+        "realtime_api": ["websocket_server", "message_broker"],
+        "websocket_server": ["load_balancer", "message_broker"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P2",
+        "affected_service": "load_balancer",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "med_017",
+      "task_type": "severity",
+      "task_description": "Data pipeline failure affecting downstream analytics. Determine urgency.",
+      "metrics": {
+        "etl_pipeline": {"cpu": 72, "memory": 88, "error_rate": 0.35, "latency_p99": 28000},
+        "data_lake": {"cpu": 35, "memory": 48, "error_rate": 0.0, "latency_p99": 450},
+        "bi_dashboard": {"cpu": 42, "memory": 52, "error_rate": 0.12, "latency_p99": 2800}
+      },
+      "alerts": [
+        {"service": "etl_pipeline", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.35", "duration": "90m"},
+        {"service": "bi_dashboard", "type": "ModerateErrorRate", "threshold": "0.05", "current": "0.12", "duration": "85m"}
+      ],
+      "logs": [
+        "[etl_pipeline] ERROR: Schema validation failed for events table",
+        "[etl_pipeline] ERROR: Column 'user_tier' not found in source",
+        "[etl_pipeline] WARN: 142 batches failed processing",
+        "[etl_pipeline] INFO: Last successful run: 95 minutes ago",
+        "[data_lake] INFO: Storage healthy, accepting writes",
+        "[bi_dashboard] ERROR: Query failed: table events not updated",
+        "[bi_dashboard] WARN: Showing stale data from 90 minutes ago"
+      ],
+      "service_dependencies": {
+        "bi_dashboard": ["data_lake", "etl_pipeline"],
+        "etl_pipeline": ["data_sources", "data_lake"]
+      },
+      "previous_incidents": [
+        {"date": "2024-02-08", "service": "etl_pipeline", "cause": "schema change not synchronized"}
+      ],
+      "ground_truth": {
+        "severity": "P3",
+        "affected_service": "etl_pipeline",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "med_018",
+      "task_type": "silent_failure",
+      "task_description": "Load testing environment showing high resource usage. Verify if production impact.",
+      "metrics": {
+        "load_test_runner": {"cpu": 92, "memory": 88, "error_rate": 0.0, "latency_p99": 850},
+        "test_target_api": {"cpu": 85, "memory": 82, "error_rate": 0.0, "latency_p99": 420},
+        "shared_database": {"cpu": 68, "memory": 72, "error_rate": 0.0, "latency_p99": 180}
+      },
+      "alerts": [],
+      "logs": [
+        "[load_test_runner] INFO: Running load test: checkout_flow_v2",
+        "[load_test_runner] INFO: Virtual users: 5000, Duration: 30m",
+        "[load_test_runner] INFO: Current RPS: 12,400",
+        "[test_target_api] INFO: Handling load test traffic",
+        "[test_target_api] INFO: Response times within SLA",
+        "[shared_database] WARN: Query load elevated (test environment)"
+      ],
+      "service_dependencies": {
+        "load_test_runner": ["test_target_api"],
+        "test_target_api": ["shared_database"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "NONE",
+        "affected_service": "",
+        "is_incident": false
+      }
+    },
+    {
+      "id": "med_019",
+      "task_type": "root_cause",
+      "task_description": "DNS resolution issues causing application-layer failures. Find true root cause.",
+      "metrics": {
+        "mobile_app_backend": {"cpu": 68, "memory": 72, "error_rate": 0.28, "latency_p99": 18000},
+        "external_api_gateway": {"cpu": 75, "memory": 78, "error_rate": 0.32, "latency_p99": 25000},
+        "dns_resolver": {"cpu": 92, "memory": 85, "error_rate": 0.0, "latency_p99": 8500},
+        "internal_services": {"cpu": 42, "memory": 48, "error_rate": 0.0, "latency_p99": 180}
+      },
+      "alerts": [
+        {"service": "dns_resolver", "type": "HighCPU", "threshold": "80%", "current": "92%", "duration": "18m"},
+        {"service": "external_api_gateway", "type": "HighErrorRate", "threshold": "0.05", "current": "0.32", "duration": "15m"},
+        {"service": "mobile_app_backend", "type": "HighErrorRate", "threshold": "0.05", "current": "0.28", "duration": "15m"}
+      ],
+      "logs": [
+        "[dns_resolver] ERROR: DNS query timeout for external-api.partner.com",
+        "[dns_resolver] WARN: Upstream DNS server not responding",
+        "[dns_resolver] ERROR: SERVFAIL for *.partner.com domains",
+        "[external_api_gateway] ERROR: getaddrinfo failed: Temporary failure",
+        "[external_api_gateway] ERROR: Cannot resolve partner API hostname",
+        "[mobile_app_backend] ERROR: External API call failed: DNS resolution",
+        "[internal_services] INFO: All internal DNS lookups succeeding"
+      ],
+      "service_dependencies": {
+        "mobile_app_backend": ["external_api_gateway", "internal_services"],
+        "external_api_gateway": ["dns_resolver", "partner_apis"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P2",
+        "affected_service": "dns_resolver",
+        "is_incident": true
+      }
+    },
+    {
+      "id": "med_020",
+      "task_type": "severity",
+      "task_description": "Feature flag service degradation. Assess impact on production systems.",
+      "metrics": {
+        "feature_flag_service": {"cpu": 88, "memory": 92, "error_rate": 0.38, "latency_p99": 12000},
+        "application_servers": {"cpu": 58, "memory": 65, "error_rate": 0.04, "latency_p99": 850}
+      },
+      "alerts": [
+        {"service": "feature_flag_service", "type": "CriticalErrorRate", "threshold": "0.10", "current": "0.38", "duration": "20m"},
+        {"service": "feature_flag_service", "type": "HighMemory", "threshold": "85%", "current": "92%", "duration": "22m"}
+      ],
+      "logs": [
+        "[feature_flag_service] ERROR: Unable to fetch flag configuration",
+        "[feature_flag_service] ERROR: Config cache expired, refresh failing",
+        "[feature_flag_service] WARN: Serving stale flag values",
+        "[application_servers] WARN: Feature flag lookup timeout",
+        "[application_servers] INFO: Using default flag values (all features disabled)",
+        "[application_servers] INFO: Core functionality operational"
+      ],
+      "service_dependencies": {
+        "application_servers": ["feature_flag_service", "database"],
+        "feature_flag_service": ["config_store", "cache_redis"]
+      },
+      "previous_incidents": [],
+      "ground_truth": {
+        "severity": "P3",
+        "affected_service": "feature_flag_service",
+        "is_incident": true
+      }
+    }
+  ]
+}
